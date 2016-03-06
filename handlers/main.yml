@@ -1,19 +1,24 @@
 ---
-# handlers file for roles/postfix-satellite
+# handlers file for roles/postfix-relay
 
 - name: restart postfix
   service: >
-      name=postfix
-      state=restarted
+      name="postfix"
+      state="restarted"
   tags: postfix
 
 - name: reload postfix
   service: >
-      name=postfix
-      state=reloaded
+      name="postfix"
+      state="reloaded"
   tags: postfix
     
 - name: newaliases
   command: "/usr/bin/newaliases"
   tags: postfix
 
+- name: rebuild db
+  command: "/usr/bin/make"
+  args:
+      chdir: "/etc/postfix"
+  tags: postfix 

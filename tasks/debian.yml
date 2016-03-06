@@ -1,7 +1,14 @@
 ---
-# tasks file for roles/postfix-satellite
+# tasks file for roles/postfix-relay
     
 - name: install postfix (apt)
-  apt: name=postfix state=present
+  apt: >
+      name="postfix" 
+      state="present"
   tags: postfix
-      
+
+- name: install make (apt)
+  apt: >
+      name="make" 
+      state="present"
+  tags: postfix

@@ -1,6 +1,5 @@
 ---
-# tasks file for roles/postfix-satellite/tasks/redhat.yml
-
+# tasks file for roles/postfix-relay
 - name: install postfix packages (yum)
   become: yes
   yum: name=postfix state=present

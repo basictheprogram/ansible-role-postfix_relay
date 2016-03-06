@@ -1,27 +1,82 @@
 ---
-# tasks file for roles/postfix-satellite
+# tasks file for roles/postfix-relay
 
 - include: debian.yml
   when: ansible_os_family == 'Debian'
-#- include: redhat.yml
-#  when: ansible_os_family == 'RedHat'
+
+- debug: msg="group_var/all global variable? {{ private_data }}"
+  tags: postfix-relay
   
-- name: install postfix config
-  template: >
-      src=postfix_main_cf.j2
-      dest=/etc/postfix/main.cf
-      owner=root
-      group=root
-      mode=0644
-  notify: [ 'restart postfix' ]
-  tags: postfix
+- name: copy file from private_data 
+  copy: >
+      src="{{ private_data }}/windows-plays.tar.gz"
+      dest="/tmp"
+      owner="rte"
+      group="rte"
+      mode="0644"
+  tags: postfix-relay
+      
+- name: check if postfix configuration under git
+  stat: >
+      path="/etc/postfix/.git"
+  register: st
+  tags: postfix-relay
+
+- name: move non-git controlled postfix configuration
+  command: "mv /etc/postfix /tmp/postfix.old"
+  when: st.stat.islnk is not defined
+  tags: postfix-relay
+  
+# http://stackoverflow.com/questions/24124140/ssh-agent-forwarding-with-ansible
+- name: copy sudoers file for safety
+  command: "cp -f /etc/sudoers /etc/sudoers.tmp"
+  register: result
+  failed_when: >
+      result.rc != 0
+  changed_when: >
+      result.rc == 0 and ("Gonna always change" in result.stderr)
+  tags: postfix-relay
+
+- name: "make sure ssh-agent works via sudo"
+  lineinfile: >
+      dest="/etc/sudoers.tmp"
+      state="present"
+      regexp='^Defaults env_keep\+\=SSH_AUTH_SOCK'
+      line='Defaults env_keep+=SSH_AUTH_SOCK'
+  tags: postfix-relay
+
+- name: final sudoers file check
+  shell: "visudo -q -c -f /etc/sudoers.tmp && cp -f /etc/sudoers.tmp /etc/sudoers"
+  register: result
+  failed_when: >
+      result.rc != 0
+  changed_when: >
+      result.rc == 0 and ("Gonna always change" in result.stderr)
+  tags: postfix-relay
+          
+- name: deploy postfix configuration
+  git: >
+      repo="{{ postfix_repository }}"
+      dest="/etc/postfix"
+      accept_hostkey="yes"
+      clone="yes"
+      recursive="yes"
+      update="yes"
+      version="{{ postfix_branch }}"
+  register: git_result
+  notify:
+      - rebuild db
+      - restart postfix
+  tags: postfix-relay
 
 - name: configure aliases database
   template: >
-      src=aliases.j2
-      dest=/etc/aliases
-      owner=root
-      group=root
-      mode=0644
+      src="aliases.j2"
+      dest="/etc/aliases"
+      owner="root"
+      group="root"
+      mode="0644"
   notify: newaliases
-  tags: postfix
+  tags: postfix-relay
+
+
