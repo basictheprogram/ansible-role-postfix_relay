@@ -1,14 +1,12 @@
 ---
 # tasks file for roles/postfix-relay
-    
-- name: install postfix (apt)
-  apt: >
-      name="postfix" 
-      state="present"
-  tags: postfix
 
-- name: install make (apt)
+- name: install postfix-relay packages (apt)
   apt: >
-      name="make" 
-      state="present"
-  tags: postfix
+      name="{{ item }} "
+      state="latest"
+  with_items:
+      - postfix
+      - postfix-pcre
+      - make
+  tags: postfix-relay

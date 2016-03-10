@@ -4,18 +4,6 @@
 - include: debian.yml
   when: ansible_os_family == 'Debian'
 
-- debug: msg="group_var/all global variable? {{ private_data }}"
-  tags: postfix-relay
-  
-- name: copy file from private_data 
-  copy: >
-      src="{{ private_data }}/windows-plays.tar.gz"
-      dest="/tmp"
-      owner="rte"
-      group="rte"
-      mode="0644"
-  tags: postfix-relay
-      
 - name: check if postfix configuration under git
   stat: >
       path="/etc/postfix/.git"
