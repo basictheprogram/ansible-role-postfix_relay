@@ -1,0 +1,29 @@
+---
+# tasks file for roles/postfix-relay
+
+- name: check if postfix configuration under git
+  stat: >
+      path="/etc/postfix/.git"
+  register: st
+  tags: postfix-relay
+
+- name: move non-git controlled postfix configuration
+  command: "mv /etc/postfix /tmp/postfix.old"
+  when: st.stat.isdir is not defined
+  tags: postfix-relay
+
+- name: deploy postfix configuration via git
+  git: >
+      repo="{{ postfix_repository }}"
+      dest="/etc/postfix"
+      accept_hostkey="yes"
+      clone="yes"
+      recursive="yes"
+      update="yes"
+      version="{{ postfix_branch }}"
+  register: git_result
+  notify:
+      - rebuild db
+      - restart postfix
+  tags: postfix-relay
+

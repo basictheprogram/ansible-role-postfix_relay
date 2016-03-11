@@ -3,7 +3,7 @@
 
 - name: install postfix-relay packages (apt)
   apt: >
-      name="{{ item }} "
+      name="{{ item }}"
       state="latest"
   with_items:
       - postfix
