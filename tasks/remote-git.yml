@@ -2,8 +2,7 @@
 # tasks file for roles/postfix-relay
 
 - name: check if postfix configuration under git
-  stat: >
-      path="/etc/postfix/.git"
+  stat: path="/etc/postfix/.git"
   register: st
   tags: postfix-relay
 
@@ -13,17 +12,16 @@
   tags: postfix-relay
 
 - name: deploy postfix configuration via git
-  git: >
-      repo="{{ postfix_repository }}"
-      dest="/etc/postfix"
-      accept_hostkey="yes"
-      clone="yes"
-      recursive="yes"
-      update="yes"
-      version="{{ postfix_branch }}"
+  git:
+	  repo: "{{ postfix_repository }}"
+	  dest: "/etc/postfix"
+	  accept_hostkey:"yes"
+	  clone: "yes"
+	  recursive: "yes"
+	  update: "yes"
+	  version: "{{ postfix_branch }}"
   register: git_result
   notify:
-      - rebuild db
-      - restart postfix
+	  - rebuild db
+	  - restart postfix
   tags: postfix-relay
-

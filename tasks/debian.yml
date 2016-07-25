@@ -2,9 +2,9 @@
 # tasks file for roles/postfix-relay
 
 - name: install postfix-relay packages (apt)
-  apt: >
-      name="{{ item }}"
-      state="latest"
+  apt: 
+	name: "{{ item }}"
+	state: "latest"
   with_items:
       - postfix
       - postfix-pcre

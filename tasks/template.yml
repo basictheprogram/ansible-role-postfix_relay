@@ -2,11 +2,12 @@
 # tasks file for roles/postfix-relay
 
 - name: install postfix main configuration via template
-  template: >
-      src="postfix_relay_main_cf.j2"
-      dest="/etc/postfix/main.cf"
-      owner="root"
-      group="root"
-      mode="0644"
+  template: 
+	  src: "postfix_relay_main_cf.j2"
+	  dest: "/etc/postfix/main.cf"
+	  owner: "root"
+	  group: "root"
+	  mode: "0644"
   notify: [ 'restart postfix' ]
   tags: postfix-relay
+  

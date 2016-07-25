@@ -20,13 +20,12 @@
   tags: postfix-relay
   
 - name: configure aliases database
-  template: >
-      src="aliases.j2"
-      dest="/etc/aliases"
-      owner="root"
-      group="root"
-      mode="0644"
-  notify: newaliases
+  template:
+	  src:"aliases.j2"
+	  dest:"/etc/aliases"
+	  owner:"root"
+	  group:"root"
+	  mode:"0644"
+  notify: 
+    - newaliases
   tags: postfix-relay
-
-
