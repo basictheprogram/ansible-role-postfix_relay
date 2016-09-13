@@ -18,7 +18,11 @@
 - include: template.yml
   when: postfix_configuration == 'template'
   tags: postfix-relay
-  
+
+- include: error.yml
+  when: postfix_configuration is undefined
+  tags: postfix-relay
+    
 - name: configure aliases database
   template:
 	  src:"aliases.j2"
