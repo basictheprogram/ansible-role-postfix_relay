@@ -6,7 +6,11 @@
 
 - include: ../lib/sudo-safety.yml
   tags: postfix-relay
-  
+
+- fail: msg="postfix_configuration must be defined"
+  when: postfix_configuration is undefined
+  tags: postfix-relay
+
 - include: remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix-relay
@@ -18,18 +22,26 @@
 - include: template.yml
   when: postfix_configuration == 'template'
   tags: postfix-relay
-
-- include: error.yml
-  when: postfix_configuration is undefined
-  tags: postfix-relay
     
 - name: configure aliases database
   template:
-	  src:"aliases.j2"
-	  dest:"/etc/aliases"
-	  owner:"root"
-	  group:"root"
-	  mode:"0644"
+    src: aliases.j2
+    dest: /etc/aliases
+    owner: root
+    group: root
+    mode: 0644
   notify: 
     - newaliases
+  tags: postfix-relay
+
+- name: listen on non-standard port
+  lineinfile:
+    dest: /etc/postfix/master.cf
+    regexp: '^{{ item }}'
+    line: '{{ item }}  inet  n       -       y       -       -       smtpd'
+    state: present
+  with_items:
+    - "{{ postfix_ports }}"
+  notify:
+    - reload postfix
   tags: postfix-relay

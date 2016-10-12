@@ -2,15 +2,15 @@
 # handlers file for roles/postfix-relay
 
 - name: restart postfix
-  service: >
-      name="postfix"
-      state="restarted"
+  service:
+    name: "postfix"
+    state: "restarted"
   tags: postfix
 
 - name: reload postfix
-  service: >
-      name="postfix"
-      state="reloaded"
+  service:
+    name: "postfix"
+    state: "reloaded"
   tags: postfix
     
 - name: newaliases
