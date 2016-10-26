@@ -17,6 +17,7 @@
     dest: /etc/postfix/mynetworks
     regexp: '^{{ item }}(.*)$'
     line: '{{ item }}'
+    create: yes
     state: present
   with_items:
     - "{{ postfix_mynetworks }}"
