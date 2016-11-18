@@ -42,6 +42,8 @@
     state: present
   with_items:
     - "{{ postfix_ports }}"
+  when:
+    - postfix_ports is defined
   notify:
     - reload postfix
   tags: postfix-relay
