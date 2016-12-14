@@ -35,6 +35,17 @@
     - restart postfix
   tags: postfix-relay
 
+# Find zimbra.real-time.com as the relayhost change it to relay.real-time.com
+#
+- name: relay host check 
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    regexp: '^relayhost(\s*)=(\s*)(\[?)zimbra\.real-time\.com(\]?)(.*)$'
+    line: 'relayhost = [relay.real-time.com]'
+    backrefs: yes
+  ignore_errors: yes
+  tags: postfix-relay
+
 - name: listen on non-standard port
   lineinfile:
     dest: /etc/postfix/master.cf
