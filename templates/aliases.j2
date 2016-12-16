@@ -2,3 +2,8 @@
 postmaster:     root
 root:           {{ postfix_admin_email }}
 
+{% if postfix_aliases is defined -%}
+    {%- for item in postfix_aliases -%}
+        {{ item.user }}:   {{ item.alias }}
+    {% endfor %}
+{% endif %}
