@@ -1,6 +1,17 @@
 ---
 # tasks file for roles/postfix-relay
 
+- name: /var/run/dovecot
+  file: 
+    path: /var/run/dovecot
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+  
 - name: activate unix_listener
   blockinfile:
     dest: /etc/dovecot/conf.d/10-master.conf
@@ -93,4 +104,23 @@
     - restart dovecot
   tags: postfix-relay
 
-  
+- name: use syslog dovecot logging
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-logging.conf
+    regexp: '^#log_path'
+    line: 'log_path = syslog'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: use mail syslog facility
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-logging.conf
+    regexp: '^#syslog_facility'
+    line: 'syslog_facility = mail'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
