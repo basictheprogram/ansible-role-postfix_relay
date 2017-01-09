@@ -11,15 +11,15 @@
   when: postfix_configuration is undefined
   tags: postfix-relay
 
-- include: remote-git.yml
+- include: conf/remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix-relay
 
-- include: local-git.yml
+- include: conf/local-git.yml
   when: postfix_configuration == 'localhost'
   tags: postfix-relay
 
-- include: template.yml
+- include: conf/template.yml
   when: postfix_configuration == 'template'
   tags: postfix-relay
     
@@ -59,3 +59,72 @@
   notify:
     - reload postfix
   tags: postfix-relay
+
+- name: activate unix_listener
+  blockinfile:
+    dest: /etc/dovecot/conf.d/10-master.conf
+    content: |
+      service auth {
+          unix_listener /var/spool/postfix/private/auth {
+            mode = 0600
+            user = postfix
+            group = postfix
+          }
+      }
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay
+
+- name: support broken MUA's
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-master.conf
+    regexp: '^auth_mechanisms'
+    line: 'auth_mechanisms = plain login'
+    state: present
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay
+
+- name: SASL with submission port
+  blockinfile:
+    dest: /etc/postfix/master.cf
+    content: |
+      submission inet n - n - - smtpd
+        -o smtpd_tls_security_level=encrypt
+        -o smtpd_sasl_auth_enable=yes
+        -o smtpd_sasl_type=dovecot
+        -o smtpd_sasl_path=private/auth
+        -o smtpd_sasl_security_options=noanonymous
+        -o smtpd_sasl_local_domain=$myhostname
+        -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+        -o smtpd_sender_login_maps=pcre:/etc/postfix/login_map
+        -o smtpd_sender_restrictions=reject_sender_login_mismatch
+        -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject    
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay 
+
+- name: upload authentication database schema
+  copy:
+    src: auth-db.sql 
+    dest: /etc/dovecot
+    owner: root
+    group: root
+    mode: 0640
+  tags: postfix-relay2
+
+- name: create dovecot sqlite3 authentication database
+  shell: "/usr/bin/sqlite3 /etc/dovecot/auth-db.db < /etc/dovecot/auth-db.sql"
+  register: r 
+  failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
+  changed_when: "'table users already exists' not in r.stderr"
+  tags: postfix-relay2

@@ -9,4 +9,7 @@
     - postfix
     - postfix-pcre
     - make
+    - dovecot-core
+    - dovecot-sqlite
+    - sqlite3
   tags: postfix-relay

@@ -1,13 +1,20 @@
-smtpd_relay_restrictions = permit_mynetworks defer_unauth_destination
 myhostname = {{ postfix_myhostname }}
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
 myorigin = {{ postfix_myorigin }}
 mydestination = {{ postfix_mydestination }}, localhost
-relayhost =
 mynetworks = $config_directory/mynetworks
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
 inet_protocols = {{ postfix_inet_protocols | default("all") }}
 compatibility_level = {{ postfix_compatibility_level | default("0") }}
+
+smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
+{% if postfix_sasl_type == 'dovecot' %}
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_relay_restrictions = permit_mynetworks, permit_sasl_authenticated, reject_unauth_destination
+{% else %}
+smtpd_relay_restrictions = permit_mynetworks, reject_unauth_destination
+{% endif %}
