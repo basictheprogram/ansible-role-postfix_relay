@@ -113,6 +113,18 @@
     - restart postfix   
   tags: postfix-relay 
 
+- name: activate auth-sql.conf
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-auth.conf
+    regexp: '^#!include auth-sql.conf.ext'
+    line: '!include auth-sql.conf.ext'
+    backrefs: yes
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
 - name: upload authentication database schema
   copy:
     src: auth-db.sql 
@@ -120,11 +132,38 @@
     owner: root
     group: root
     mode: 0640
-  tags: postfix-relay2
+  when:
+    - postfix_sasl_type == 'dovecot'
+  tags: postfix-relay
 
 - name: create dovecot sqlite3 authentication database
   shell: "/usr/bin/sqlite3 /etc/dovecot/auth-db.db < /etc/dovecot/auth-db.sql"
   register: r 
   failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
   changed_when: "'table users already exists' not in r.stderr"
-  tags: postfix-relay2
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: use sqlite for authentication database
+  blockinfile:
+    dest: /etc/dovecot/dovecot-sql.conf.ext
+    content: |
+      driver = sqlite
+      connect = /etc/dovecot/auth-db.db
+
+      password_query = SELECT userid AS username, domain, password FROM users WHERE userid = '%n' AND domain = '%d'
+
+      user_query = SELECT home, uid, gid FROM users WHERE userid = '%n' AND domain = '%d'
+
+      # For using doveadm -A:
+      iterate_query = SELECT userid AS username, domain FROM users
+  when:
+    - postfix_sasl_type == 'dovecot'
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+  
