@@ -5,20 +5,33 @@
   service:
     name: "postfix"
     state: "restarted"
-  tags: postfix
+  tags: postfix-relay
 
 - name: reload postfix
   service:
     name: "postfix"
     state: "reloaded"
-  tags: postfix
+  tags: postfix-relay
     
 - name: newaliases
   command: "/usr/bin/newaliases"
-  tags: postfix
+  tags: postfix-relay
 
 - name: rebuild db
   command: "/usr/bin/make"
   args:
       chdir: "/etc/postfix"
-  tags: postfix 
+  tags: postfix-relay 
+
+
+- name: restart dovecot
+  service:
+    name: "dovecot"
+    state: "restarted"
+  tags: postfix-relay
+
+- name: reload dovecot
+  service:
+    name: "dovecot"
+    state: "reloaded"
+  tags: postfix-relay

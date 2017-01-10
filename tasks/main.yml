@@ -11,15 +11,15 @@
   when: postfix_configuration is undefined
   tags: postfix-relay
 
-- include: remote-git.yml
+- include: conf/remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix-relay
 
-- include: local-git.yml
+- include: conf/local-git.yml
   when: postfix_configuration == 'localhost'
   tags: postfix-relay
 
-- include: template.yml
+- include: conf/template.yml
   when: postfix_configuration == 'template'
   tags: postfix-relay
     
@@ -59,3 +59,6 @@
   notify:
     - reload postfix
   tags: postfix-relay
+
+- include: dovecot/main.yml
+  when: postfix_sasl_type == 'dovecot'

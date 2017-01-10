@@ -1,0 +1,126 @@
+---
+# tasks file for roles/postfix-relay
+
+- name: /var/run/dovecot
+  file: 
+    path: /var/run/dovecot
+    owner: root
+    group: root
+    mode: 0755
+    state: directory
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+  
+- name: activate unix_listener
+  blockinfile:
+    dest: /etc/dovecot/conf.d/10-master.conf
+    content: |
+      service auth {
+          unix_listener /var/spool/postfix/private/auth {
+            mode = 0600
+            user = postfix
+            group = postfix
+          }
+      }
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay
+
+- name: support broken MUA's
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-master.conf
+    regexp: '^auth_mechanisms'
+    line: 'auth_mechanisms = plain login'
+    state: present
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay
+
+- name: SASL with submission port
+  blockinfile:
+    dest: /etc/postfix/master.cf
+    content: |
+      submission inet n - n - - smtpd
+        -o smtpd_tls_security_level=encrypt
+        -o smtpd_sasl_auth_enable=yes
+        -o smtpd_sasl_type=dovecot
+        -o smtpd_sasl_path=private/auth
+        -o smtpd_sasl_security_options=noanonymous
+        -o smtpd_sasl_local_domain=$myhostname
+        -o smtpd_client_restrictions=permit_sasl_authenticated,reject
+        -o smtpd_sender_login_maps=pcre:/etc/postfix/login_map
+        -o smtpd_sender_restrictions=reject_sender_login_mismatch
+        -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject    
+  notify:
+    - restart dovecot
+    - restart postfix   
+  tags: postfix-relay 
+
+- name: activate auth-sql.conf
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-auth.conf
+    regexp: '^#!include auth-sql.conf.ext'
+    line: '!include auth-sql.conf.ext'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: upload authentication database schema
+  copy:
+    src: auth-db.sql 
+    dest: /etc/dovecot
+    owner: root
+    group: root
+    mode: 0640
+  tags: postfix-relay
+
+- name: create dovecot sqlite3 authentication database
+  shell: "/usr/bin/sqlite3 /etc/dovecot/auth-db.db < /etc/dovecot/auth-db.sql"
+  register: r 
+  failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
+  changed_when: "'table users already exists' not in r.stderr"
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: use sqlite for authentication database
+  blockinfile:
+    dest: /etc/dovecot/dovecot-sql.conf.ext
+    content: |
+      driver = sqlite
+      connect = /etc/dovecot/auth-db.db
+
+      password_query = SELECT userid AS username, domain, password FROM users WHERE userid = '%n' AND domain = '%d'
+
+      user_query = SELECT home, uid, gid FROM users WHERE userid = '%n' AND domain = '%d'
+
+      # For using doveadm -A:
+      iterate_query = SELECT userid AS username, domain FROM users
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: use syslog dovecot logging
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-logging.conf
+    regexp: '^#log_path'
+    line: 'log_path = syslog'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
+- name: use mail syslog facility
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-logging.conf
+    regexp: '^#syslog_facility'
+    line: 'syslog_facility = mail'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
+
