@@ -1,0 +1,46 @@
+---
+# tasks file for roles/postfix-relay
+
+- include: "{{ role_path }}/../lib/gnutls-certs.yml"
+  tags: postfix-relay
+
+- name: deploy TLS certificate and keys
+  copy:
+    src: "{{ item }}"
+    dest: "/etc/ssl/private/{{ item | basename }}"
+    owner: root
+    group: ssl-cert
+    mode: 0640
+  changed_when: False
+  with_items:
+    - "{{ key_pem }}"
+    - "{{ cert_pem }}"
+  notify:
+    - update ca-certificates
+  tags: postfix-relay
+
+- name: copy TLS key
+  copy:
+    src: "{{ key_pem }}"
+    dest: /etc/ssl/private/{{ postfix_myhostname }}.pem
+    owner: root
+    group: ssl-cert
+    mode: 0640
+  notify:
+    - update ca-certificates
+  tags: postfix-relay
+
+- name: combine certificate and key
+  lineinfile:
+    dest: /etc/ssl/private/{{ postfix_myhostname }}.pem
+    regexp: "BEGIN CERTIFICATE"
+    line: "{{ lookup('file', '{{ cert_pem }}') }}"
+    state: present
+    owner: root
+    group: ssl-cert
+    mode: 0640
+  changed_when: False
+  notify:
+    - update ca-certificates
+  tags: postfix-relay
+

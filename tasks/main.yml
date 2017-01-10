@@ -62,3 +62,6 @@
 
 - include: dovecot/main.yml
   when: postfix_sasl_type == 'dovecot'
+
+- include: tls/main.yml
+  when: postfix_tls_rsa is defined
