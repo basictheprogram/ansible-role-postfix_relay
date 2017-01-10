@@ -39,6 +39,18 @@
     - restart postfix   
   tags: postfix-relay
 
+- name: smtpd_sender_login_maps
+  copy:
+    src: login_map
+    dest: /etc/postfix/login_map
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - reload postfix
+    - postmap
+  tags: postfix-relay
+
 - name: SASL with submission port
   blockinfile:
     dest: /etc/postfix/master.cf

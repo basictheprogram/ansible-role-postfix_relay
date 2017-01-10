@@ -35,3 +35,17 @@
     name: "dovecot"
     state: "reloaded"
   tags: postfix-relay
+
+- name: update ca-certificates
+  command: "/usr/sbin/update-ca-certificates"
+  register: r 
+  tags: postfix-relay
+  
+- name: postmap 
+  command: "/usr/sbin/postmap {{ item }}"
+  args:
+    chdir: /etc/postfix/
+  register: r
+  with_items:
+    - "login_map"
+  tags: postfix-relay
