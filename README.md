@@ -73,6 +73,12 @@ sqlite> update users set password='{SHA512-CRYPT}XXX' where userid='user' and do
 sqlite> .exit
 ```
 
+## Mail From verification ##
+The smtp authentication username must match the "Mail From". Example, "Mail from tanner@real-time.com"
+smtp authentication username "tanner@real-time.com". If they do not match an entry must be put into the
+/etc/postfix/login_map (see http://www.postfix.org/postconf.5.html#smtpd_sender_login_maps). Just be easiest
+to enforces the requirement.
+
 # License #
 
 
