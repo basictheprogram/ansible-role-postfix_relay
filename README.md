@@ -104,6 +104,13 @@ SHA-256 Fingerprint       9D:93:71:A4:89:A0:EE:44:08:F2:C2:7E:FF:0D:6F:1E:
                           18:1F:E4:E5:E7:6C:A2:BF:B3:0C:B0:7E:B4:E4:27:86
 SHA1 Fingerprint          19:CE:F7:E6:8C:9F:98:FC:73:54:2D:BB:37:92:29:FD:55:FC:42:3E
 ```
+
+## mynetworks ##
+Need to edit the [mynetworks](http://bit.ly/2jb9ZVB) file?
+
+## relay_domains ##
+Need to edit the [relay_domains](http://bit.ly/2jb9ZVB) file?
+
 # License #
 
 
