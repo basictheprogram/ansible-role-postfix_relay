@@ -146,3 +146,12 @@
     - restart dovecot
   tags: postfix-relay
 
+- name: log unsuccessful authentication attempts
+  lineinfile:
+    dest: /etc/dovecot/conf.d/10-logging.conf
+    regexp: '^#auth_verbose = no'
+    line: 'auth_verbose = yes'
+    backrefs: yes
+  notify:
+    - restart dovecot
+  tags: postfix-relay
