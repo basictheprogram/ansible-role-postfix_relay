@@ -52,5 +52,4 @@
   with_items:
     - "login_map"
     - "relay_domains"
-    - "mynetworks"
   tags: postfix-relay
