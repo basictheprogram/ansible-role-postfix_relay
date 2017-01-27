@@ -74,11 +74,36 @@ sqlite> .exit
 ```
 
 ## Mail From verification ##
-The smtp authentication username must match the "Mail From". Example, "Mail from tanner@real-time.com"
-smtp authentication username "tanner@real-time.com". If they do not match an entry must be put into the
-/etc/postfix/login_map (see http://www.postfix.org/postconf.5.html#smtpd_sender_login_maps). Just be easiest
-to enforces the requirement.
+The smtp authentication username must match the "Mail From". 
+```
+Mail from tanner@real-time.com = smtp authentication username "tanner@real-time.com". 
+```
+If they do not match an entry must be put into the /etc/postfix/login_map (see 
+http://www.postfix.org/postconf.5.html#smtpd_sender_login_maps). 
 
+## Self-sign Certificate ##
+You will need to accept the self-signed certificate for TLS to work as expected.
+```
+Issued To
+Common Name (CN)          relay.dmz.example.com
+Organization (O)          Real Time Enterprises Inc
+Organization Unit (OU)    Real Time Support
+Serial Number             78:39:23:A8
+
+Issued by
+Common Name (CN)          Postfix Certificate Authority
+Organization (O)          Real Time Enterprises Inc
+Organization Unit (OU)    Real Time Support
+
+Period of Validity
+Begins On                 Friday, January 27, 2017
+Expires On                Monday, January 25, 2027
+
+Fingerprints
+SHA-256 Fingerprint       9D:93:71:A4:89:A0:EE:44:08:F2:C2:7E:FF:0D:6F:1E:
+                          18:1F:E4:E5:E7:6C:A2:BF:B3:0C:B0:7E:B4:E4:27:86
+SHA1 Fingerprint          19:CE:F7:E6:8C:9F:98:FC:73:54:2D:BB:37:92:29:FD:55:FC:42:3E
+```
 # License #
 
 
