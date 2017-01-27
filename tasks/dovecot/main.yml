@@ -81,17 +81,19 @@
     - restart dovecot
   tags: postfix-relay
 
+# See vars/main.yml for dovecot variable definiations
+#
 - name: upload authentication database schema
   copy:
     src: auth-db.sql 
-    dest: /etc/dovecot
+    dest: "{{ dovecot_sql_schema }}"
     owner: root
     group: root
     mode: 0640
   tags: postfix-relay
 
 - name: create dovecot sqlite3 authentication database
-  shell: "/usr/bin/sqlite3 /etc/dovecot/auth-db.db < /etc/dovecot/auth-db.sql"
+  shell: "/usr/bin/sqlite3 {{ dovecot_sql_db }} < {{ dovecot_sql_schema }}"
   register: r 
   failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
   changed_when: "'table users already exists' not in r.stderr"
@@ -99,12 +101,20 @@
     - restart dovecot
   tags: postfix-relay
 
+- name: secure authentication database file permissions
+  file:
+    path: "{{ dovecot_sql_db }}"
+    owner: root
+    group: root
+    mode: 0640
+  tags: postfix-relay
+
 - name: use sqlite for authentication database
   blockinfile:
     dest: /etc/dovecot/dovecot-sql.conf.ext
     content: |
       driver = sqlite
-      connect = /etc/dovecot/auth-db.db
+      connect = {{ dovecot_sql_db }}
 
       password_query = SELECT userid AS username, domain, password FROM users WHERE userid = '%n' AND domain = '%d'
 

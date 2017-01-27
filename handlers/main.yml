@@ -12,7 +12,8 @@
     name: "postfix"
     state: "reloaded"
   tags: postfix-relay
-    
+
+
 - name: newaliases
   command: "/usr/bin/newaliases"
   tags: postfix-relay
@@ -36,11 +37,13 @@
     state: "reloaded"
   tags: postfix-relay
 
+
 - name: update ca-certificates
   command: "/usr/sbin/update-ca-certificates"
   register: r 
   tags: postfix-relay
-  
+
+
 - name: postmap 
   command: "/usr/sbin/postmap {{ item }}"
   args:
@@ -48,4 +51,6 @@
   register: r
   with_items:
     - "login_map"
+    - "relay_domains"
+    - "mynetworks"
   tags: postfix-relay

@@ -11,3 +11,12 @@ cert_pem: "{{ ssl_dir }}/{{  bootstrap_fqdn }}-cert.pem"
 
 ca_pem: "{{ master_ca_pem['postfix'] }}"
 ca_key_pem: "{{ master_ca_key_pem['postfix'] }}"
+
+dovecot_sql_schema_dir: "/etc/postfix"
+dovecot_sql_schema_name: "auth-db.sql"
+dovecot_sql_schema: "{{ dovecot_sql_schema_dir }}/{{ dovecot_sql_schema_name }}"
+
+dovecot_sql_db_dir: "/etc/postfix"
+dovecot_sql_db_name: "auth-db.db"
+dovecot_sql_db: "{{ dovecot_sql_db_dir }}/{{ dovecot_sql_db_name }}"
+

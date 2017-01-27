@@ -13,15 +13,43 @@
     - restart postfix
   tags: postfix-relay
 
-- name: configure mynetworks
+- name: configure mynetworks (list)
   lineinfile:
     dest: /etc/postfix/mynetworks
     regexp: '^{{ item }}(.*)$'
     line: '{{ item }}'
     create: yes
     state: present
+  when:
+    - postfix_mynetworks_conf == 'list'
   with_items:
     - "{{ postfix_mynetworks }}"
   notify:
+    - reload postfix
+  tags: postfix-relay
+
+- name: configure mynetworks (file)
+  copy:
+    src: "{{ postfix_mynetworks }}"
+    dest: /etc/postfix/mynetworks
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - postfix_mynetworks_conf == 'file'
+  notify:
+    - postmap
+    - reload postfix
+  tags: postfix-relay
+
+- name: configure relay_domains (file)
+  copy:
+    src: "{{ postfix_relay_domains }}"
+    dest: /etc/postfix/relay_domains
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - postmap
     - reload postfix
   tags: postfix-relay
