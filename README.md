@@ -52,7 +52,7 @@ Retype new password:
 Insert the user into the sqlite database. The home, uid, gid are not used at this time.
 ```
 relay$ sudo -i
-root@relay:~# cd /etc/dovecot/
+root@relay:~# cd /etc/postfix/
 root@relay:/etc/dovecot# sqlite3 auth-db.db
 sqlite> insert into users (userid, domain, password, home, uid, gid) values ('user','domain','{SHA512-CRYPT}XXX','home',1000,1000);
 sqlite> .exit
