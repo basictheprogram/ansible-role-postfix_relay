@@ -19,28 +19,23 @@
     - update ca-certificates
   tags: postfix-relay
 
-- name: copy TLS key
-  copy:
-    src: "{{ key_pem }}"
-    dest: /etc/ssl/private/{{ postfix_myhostname }}.pem
-    owner: root
-    group: ssl-cert
-    mode: 0640
-  notify:
-    - update ca-certificates
-  tags: postfix-relay
-
 - name: combine certificate and key
-  lineinfile:
-    dest: /etc/ssl/private/{{ postfix_myhostname }}.pem
-    regexp: "BEGIN CERTIFICATE"
-    line: "{{ lookup('file', '{{ cert_pem }}') }}"
-    state: present
-    owner: root
-    group: ssl-cert
-    mode: 0640
-  changed_when: False
+  shell: "/bin/cat {{ key_pem | basename }} {{ cert_pem | basename }} > {{ postfix_myhostname }}.pem"
+  args:
+    chdir: /etc/ssl/private/
+    creates: /etc/ssl/private/{{ postfix_myhostname }}.pem
+  changed_when: false
   notify:
     - update ca-certificates
   tags: postfix-relay
 
+- name: fix permissions
+  file:
+    path: /etc/ssl/private/{{ postfix_myhostname }}.pem
+    owner: root
+    group: ssl-cert
+    mode: 0640
+  notify:
+    - update ca-certificates
+  tags: postfix-relay
+    
