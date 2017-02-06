@@ -18,7 +18,7 @@ state = "{{ gnutls_cert_state }}"
 country = {{ gnutls_cert_country }}
 
 # The common name of the certificate owner.
-cn = "{{ bootstrap_fqdn }}"
+cn = "{{ gnutls_cert_cn }}"
 
 # A user id of the certificate owner.
 #uid = "clauper"
@@ -43,7 +43,7 @@ expiration_days = {{ gnutls_cert_expiration_days }}
 # X.509 v3 extensions
 
 # A dnsname in case of a WWW server.
-dns_name = "{{ bootstrap_fqdn }}"
+dns_name = "{{ gnutls_cert_dns_name }}"
 
 # An IP address in case of a server.
 #ip_address = "192.168.1.1"
