@@ -11,8 +11,9 @@ inet_protocols = {{ postfix_inet_protocols | default("all") }}
 compatibility_level = {{ postfix_compatibility_level | default("0") }}
 message_size_limit = {{ postfix_message_size_limit | default("10240000") }}
 
-smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
+{% if postfix_sasl_type is defined %}
 {% if postfix_sasl_type == 'dovecot' %}
+smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
 smtpd_sasl_path = private/auth
 smtpd_sasl_auth_enable = yes
 smtpd_relay_restrictions = 
@@ -23,6 +24,7 @@ smtpd_relay_restrictions =
 smtpd_relay_restrictions = 
     permit_mynetworks
     reject_unauth_destination
+{% endif %}
 {% endif %}
 
 {% if postfix_tls_rsa is defined %}
