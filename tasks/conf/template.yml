@@ -21,7 +21,7 @@
     create: yes
     state: present
   when:
-    - postfix_mynetworks_conf == 'list'
+    - postfix_mynetworks_conf is not defined
   with_items:
     - "{{ postfix_mynetworks }}"
   notify:
@@ -36,6 +36,7 @@
     group: root
     mode: 0644
   when:
+    - postfix_mynetworks_conf is defined
     - postfix_mynetworks_conf == 'file'
   notify:
     - postmap
@@ -49,6 +50,9 @@
     owner: root
     group: root
     mode: 0644
+  when:
+    - postfix_relay_domains is defined
+    - postfix_relay_domains == 'file'
   notify:
     - postmap
     - reload postfix
