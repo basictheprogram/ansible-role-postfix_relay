@@ -61,7 +61,10 @@
   tags: postfix-relay
 
 - include: dovecot/main.yml
-  when: postfix_sasl_type == 'dovecot'
+  when:
+    - postfix_sasl_type is defined 
+    - postfix_sasl_type == 'dovecot'
 
 - include: tls/main.yml
-  when: postfix_tls_rsa is defined
+  when:
+    - postfix_tls_rsa is defined
