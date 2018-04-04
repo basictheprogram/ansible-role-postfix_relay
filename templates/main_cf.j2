@@ -11,7 +11,7 @@ inet_protocols = {{ postfix_inet_protocols | default("all") }}
 compatibility_level = {{ postfix_compatibility_level | default("0") }}
 message_size_limit = {{ postfix_message_size_limit | default("10240000") }}
 
-{%if postfix_masquerade_domains is defined %}
+{% if postfix_masquerade_domains is defined %}
 masquerade_domains = {{ postfix_masquerade_domains }}
 local_header_rewrite_clients = permit_mynetworks,permit_inet_interfaces
 {% endif %}
