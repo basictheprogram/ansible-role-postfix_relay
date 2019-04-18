@@ -1,2 +1,22 @@
 ---
 # vars file for roles/postfix-relay
+
+certtool: "/usr/local/bin/gnutls-certtool"
+ssl_dir: "{{ role_path }}/files"
+certtool_cfg: "{{ role_path }}/files/{{ inventory_hostname }}.cfg"
+
+key_pem: "{{ ssl_dir }}/{{  bootstrap_fqdn }}-key.pem"
+request_pem: "{{ ssl_dir }}/{{  bootstrap_fqdn }}-request.pem"
+cert_pem: "{{ ssl_dir }}/{{  bootstrap_fqdn }}-cert.pem"
+
+ca_pem: "{{ master_ca_pem['postfix'] }}"
+ca_key_pem: "{{ master_ca_key_pem['postfix'] }}"
+
+dovecot_sql_schema_dir: "/etc/postfix"
+dovecot_sql_schema_name: "auth-db.sql"
+dovecot_sql_schema: "{{ dovecot_sql_schema_dir }}/{{ dovecot_sql_schema_name }}"
+
+dovecot_sql_db_dir: "/etc/postfix"
+dovecot_sql_db_name: "auth-db.db"
+dovecot_sql_db: "{{ dovecot_sql_db_dir }}/{{ dovecot_sql_db_name }}"
+

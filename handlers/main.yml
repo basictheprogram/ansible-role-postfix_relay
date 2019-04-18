@@ -2,23 +2,54 @@
 # handlers file for roles/postfix-relay
 
 - name: restart postfix
-  service: >
-      name="postfix"
-      state="restarted"
-  tags: postfix
+  service:
+    name: "postfix"
+    state: "restarted"
+  tags: postfix-relay
 
 - name: reload postfix
-  service: >
-      name="postfix"
-      state="reloaded"
-  tags: postfix
-    
+  service:
+    name: "postfix"
+    state: "reloaded"
+  tags: postfix-relay
+
+
 - name: newaliases
   command: "/usr/bin/newaliases"
-  tags: postfix
+  tags: postfix-relay
 
 - name: rebuild db
   command: "/usr/bin/make"
   args:
       chdir: "/etc/postfix"
-  tags: postfix 
+  tags: postfix-relay 
+
+
+- name: restart dovecot
+  service:
+    name: "dovecot"
+    state: "restarted"
+  tags: postfix-relay
+
+- name: reload dovecot
+  service:
+    name: "dovecot"
+    state: "reloaded"
+  tags: postfix-relay
+
+
+- name: update ca-certificates
+  command: "/usr/sbin/update-ca-certificates"
+  register: r 
+  tags: postfix-relay
+
+
+- name: postmap 
+  command: "/usr/sbin/postmap {{ item }}"
+  args:
+    chdir: /etc/postfix/
+  register: r
+  with_items:
+    - "login_map"
+    - "relay_domains"
+  tags: postfix-relay

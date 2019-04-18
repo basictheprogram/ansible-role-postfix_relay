@@ -2,9 +2,22 @@
 # tasks file for roles/postfix-relay
 
 - name: install postfix-relay packages (apt)
+<<<<<<< HEAD
   apt: 
 	  name: "{{ postfix_relay_packages }}"
 	  state: "latest"
     install_recommends: no
     force_apt_get: yes
+=======
+  apt:
+    name: "{{ item }}"
+    state: "latest"
+  with_items:
+    - postfix
+    - postfix-pcre
+    - make
+    - dovecot-core
+    - dovecot-sqlite
+    - sqlite3
+>>>>>>> 8c30a3cf02ac8e99b2b56e434403433b026b9b73
   tags: postfix-relay

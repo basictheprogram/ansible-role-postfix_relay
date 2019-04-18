@@ -1,0 +1,59 @@
+---
+# tasks file for roles/postfix-relay
+
+- name: install postfix main configuration via template
+  template:
+    src: main_cf.j2
+    dest: /etc/postfix/main.cf
+    owner: root
+    group: root
+    mode: 0644
+  notify:
+    - update ca-certificates
+    - restart postfix
+  tags: postfix-relay
+
+- name: configure mynetworks (list)
+  lineinfile:
+    dest: /etc/postfix/mynetworks
+    regexp: '^{{ item }}(.*)$'
+    line: '{{ item }}'
+    create: yes
+    state: present
+  when:
+    - postfix_mynetworks_conf is not defined
+  with_items:
+    - "{{ postfix_mynetworks }}"
+  notify:
+    - reload postfix
+  tags: postfix-relay
+
+- name: configure mynetworks (file)
+  copy:
+    src: "{{ postfix_mynetworks }}"
+    dest: /etc/postfix/mynetworks
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - postfix_mynetworks_conf is defined
+    - postfix_mynetworks_conf == 'file'
+  notify:
+    - postmap
+    - reload postfix
+  tags: postfix-relay
+
+- name: configure relay_domains (file)
+  copy:
+    src: "{{ postfix_relay_domains }}"
+    dest: /etc/postfix/relay_domains
+    owner: root
+    group: root
+    mode: 0644
+  when:
+    - postfix_relay_domains is defined
+    - postfix_relay_domains == 'file'
+  notify:
+    - postmap
+    - reload postfix
+  tags: postfix-relay

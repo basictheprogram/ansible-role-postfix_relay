@@ -1,0 +1,45 @@
+myhostname = {{ postfix_myhostname }}
+alias_maps = hash:/etc/aliases
+alias_database = hash:/etc/aliases
+myorigin = {{ postfix_myorigin }}
+mydestination = {{ postfix_mydestination }}, localhost
+mynetworks = $config_directory/mynetworks
+mailbox_size_limit = 0
+recipient_delimiter = +
+inet_interfaces = all
+inet_protocols = {{ postfix_inet_protocols | default("all") }}
+compatibility_level = {{ postfix_compatibility_level | default("0") }}
+message_size_limit = {{ postfix_message_size_limit | default("10240000") }}
+
+{% if postfix_masquerade_domains is defined %}
+masquerade_domains = {{ postfix_masquerade_domains }}
+local_header_rewrite_clients = permit_mynetworks,permit_inet_interfaces
+{% endif %}
+
+{% if postfix_sasl_type is defined %}
+{% if postfix_sasl_type == 'dovecot' %}
+smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
+smtpd_sasl_path = private/auth
+smtpd_sasl_auth_enable = yes
+smtpd_relay_restrictions = 
+    permit_mynetworks
+    permit_sasl_authenticated
+    reject_unauth_destination
+{% else %}
+smtpd_relay_restrictions = 
+    permit_mynetworks
+    reject_unauth_destination
+{% endif %}
+{% endif %}
+
+{% if postfix_tls_rsa is defined %}
+# Enforce TLS "smtpd_tls_security_level = encrypt"
+smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level | default("may") }}
+
+smtpd_tls_cert_file = /etc/ssl/private/{{ postfix_myhostname }}.pem
+smtpd_tls_key_file = $smtpd_tls_cert_file
+smtpd_tls_loglevel = {{ postfix_smtpd_tls_loglevel | default("1") }}
+smtpd_tls_received_header = yes
+smtpd_tls_auth_only = yes
+smtpd_tls_mandatory_ciphers = high
+{% endif %}

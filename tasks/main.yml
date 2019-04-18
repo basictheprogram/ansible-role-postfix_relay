@@ -14,30 +14,65 @@
 
 - include: ../lib/sudo-safety.yml
   tags: postfix-relay
-  
-- include: remote-git.yml
+
+- fail: msg="postfix_configuration must be defined"
+  when: postfix_configuration is undefined
+  tags: postfix-relay
+
+- include: conf/remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix-relay
 
-- include: local-git.yml
+- include: conf/local-git.yml
   when: postfix_configuration == 'localhost'
   tags: postfix-relay
 
-- include: template.yml
+- include: conf/template.yml
   when: postfix_configuration == 'template'
-  tags: postfix-relay
-
-- include: error.yml
-  when: postfix_configuration is undefined
   tags: postfix-relay
     
 - name: configure aliases database
   template:
-	  src:"aliases.j2"
-	  dest:"/etc/aliases"
-	  owner:"root"
-	  group:"root"
-	  mode:"0644"
+    src: aliases.j2
+    dest: /etc/aliases
+    owner: root
+    group: root
+    mode: 0644
   notify: 
     - newaliases
+    - restart postfix
   tags: postfix-relay
+
+# Find zimbra.real-time.com as the relayhost change it to relay.real-time.com
+#
+- name: relay host check 
+  lineinfile:
+    dest: /etc/postfix/main.cf
+    regexp: '^relayhost(\s*)=(\s*)(\[?)zimbra\.real-time\.com(\]?)(.*)$'
+    line: 'relayhost = [relay.real-time.com]'
+    backrefs: yes
+  ignore_errors: yes
+  tags: postfix-relay
+
+- name: listen on non-standard port
+  lineinfile:
+    dest: /etc/postfix/master.cf
+    regexp: '^{{ item }}'
+    line: '{{ item }}  inet  n       -       y       -       -       smtpd'
+    state: present
+  with_items:
+    - "{{ postfix_ports }}"
+  when:
+    - postfix_ports is defined
+  notify:
+    - reload postfix
+  tags: postfix-relay
+
+- include: dovecot/main.yml
+  when:
+    - postfix_sasl_type is defined 
+    - postfix_sasl_type == 'dovecot'
+
+- include: tls/main.yml
+  when:
+    - postfix_tls_rsa is defined
