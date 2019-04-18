@@ -3,10 +3,8 @@
 
 - name: install postfix-relay packages (apt)
   apt: 
-	name: "{{ item }}"
-	state: "latest"
-  with_items:
-      - postfix
-      - postfix-pcre
-      - make
+	  name: "{{ postfix_relay_packages }}"
+	  state: "latest"
+    install_recommends: no
+    force_apt_get: yes
   tags: postfix-relay

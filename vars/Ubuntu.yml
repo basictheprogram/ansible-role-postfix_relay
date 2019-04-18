@@ -1,0 +1,4 @@
+    postfix_relay_packages:
+      - postfix
+      - postfix-pcre
+      - make
