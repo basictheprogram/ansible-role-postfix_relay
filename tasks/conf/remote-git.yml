@@ -1,19 +1,17 @@
 ---
-# tasks file for roles/postfix-relay
-
 - name: check if postfix configuration under git
-  stat: 
+  ansible.builtin.stat:
     path: /etc/postfix/.git
   register: st
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: move non-git controlled postfix configuration
-  command: "mv /etc/postfix /tmp/postfix.old"
+  ansible.builtin.command: "mv /etc/postfix /tmp/postfix.old"
   when: st.stat.isdir is not defined
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: deploy postfix configuration via git
-  git:
+  ansible.builtin.git:
     repo: "{{ postfix_repository }}"
     dest: "/etc/postfix"
     accept_hostkey: "yes"
@@ -25,5 +23,4 @@
   notify:
     - rebuild db
     - restart postfix
-  tags: postfix-relay
-  
+  tags: postfix_relay

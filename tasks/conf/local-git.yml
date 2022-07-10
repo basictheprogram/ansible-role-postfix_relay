@@ -1,7 +1,6 @@
 ---
 # tasks file for roles/postfix-relay
 
-- debug: msg="local-git.yml"
-  tags: postfix-relay
-
-
+- name: debug
+  ansible.builtin.debug: msg="local-git.yml"
+  tags: postfix_relay

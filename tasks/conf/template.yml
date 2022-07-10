@@ -1,8 +1,6 @@
 ---
-# tasks file for roles/postfix-relay
-
 - name: install postfix main configuration via template
-  template:
+  ansible.builtin.template:
     src: main_cf.j2
     dest: /etc/postfix/main.cf
     owner: root
@@ -11,25 +9,26 @@
   notify:
     - update ca-certificates
     - restart postfix
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: configure mynetworks (list)
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/postfix/mynetworks
     regexp: '^{{ item }}(.*)$'
     line: '{{ item }}'
-    create: yes
+    create: true
     state: present
+    mode: 0644
   when:
     - postfix_mynetworks_conf is not defined
   with_items:
     - "{{ postfix_mynetworks }}"
   notify:
     - reload postfix
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: configure mynetworks (file)
-  copy:
+  ansible.builtin.copy:
     src: "{{ postfix_mynetworks }}"
     dest: /etc/postfix/mynetworks
     owner: root
@@ -41,10 +40,10 @@
   notify:
     - postmap
     - reload postfix
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: configure relay_domains (file)
-  copy:
+  ansible.builtin.copy:
     src: "{{ postfix_relay_domains }}"
     dest: /etc/postfix/relay_domains
     owner: root
@@ -56,4 +55,4 @@
   notify:
     - postmap
     - reload postfix
-  tags: postfix-relay
+  tags: postfix_relay

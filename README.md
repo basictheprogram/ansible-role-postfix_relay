@@ -13,17 +13,17 @@ postfix_configuration: "template"
 
 postfix_myhostname: "smtp.domain.com"
 postfix_myorigin: "smtp.domain.com"
-postfix_mynetworks: 
+postfix_mynetworks:
     - "192.168.100.0/24"
     - "10.10.10.0/24"
-   
+
 postfix_mydestination: "smtp.domain.com, smtp2.domain.com"
 postfix_inet_protocols: ipv4
 postfix_compatibility_level: 2
 postfix_sasl_type: dovecot
 postfix_tls_rsa: true
 
-postfix_ports: 
+postfix_ports:
     - 10025
 ```
 
@@ -74,12 +74,12 @@ sqlite> .exit
 ```
 
 ## Mail From verification ##
-The smtp authentication username must match the "Mail From". 
+The smtp authentication username must match the "Mail From".
 ```
-Mail from tanner@real-time.com = smtp authentication username "tanner@real-time.com". 
+Mail from tanner@real-time.com = smtp authentication username "tanner@real-time.com".
 ```
-If they do not match an entry must be put into the /etc/postfix/login_map (see 
-http://www.postfix.org/postconf.5.html#smtpd_sender_login_maps). 
+If they do not match an entry must be put into the /etc/postfix/login_map (see
+http://www.postfix.org/postconf.5.html#smtpd_sender_login_maps).
 
 ## Self-sign Certificate ##
 You will need to accept the self-signed certificate for TLS to work as expected.
@@ -115,5 +115,5 @@ Need to edit the [relay_domains](http://bit.ly/2jb9ZVB) file?
 
 
 # Author Information #
-[Real Time Enterprises Inc.](http://www.real-time.com), 
+[Real Time Enterprises Inc.](http://www.real-time.com),
 [Bob Tanner](https://github.com/basictheprogram)

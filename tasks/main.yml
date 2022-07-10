@@ -1,61 +1,67 @@
 ---
-# tasks file for roles/postfix-relay
-
 - name: gather OS specific variables
-  include_vars: "{{ item }}"
-  with_first_found:
-    - "{{ ansible_distribution_release }}.yml"
-    - "{{ ansible_distribution }}.yml"
-    - "{{ ansible_os_family }}.yml"
-  tags: bootstrap
+  ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
+  vars:
+    params:
+      files:
+        - "{{ ansible_distribution_release }}.yml"
+        - "{{ ansible_distribution }}.yml"
+        - "{{ ansible_os_family }}.yml"
+        - "default.yml"
+      paths:
+        - "vars"
+  tags: postfix_relay
 
-- include: debian.yml
+- name: import_tasks debian.yml
+  ansible.builtin.import_tasks: debian.yml
   when: ansible_os_family == 'Debian'
+  tags: postfix_relay
 
-- include: ../lib/sudo-safety.yml
-  tags: postfix-relay
-
-- fail: msg="postfix_configuration must be defined"
+- name: check for postfix_configuration
+  ansible.builtin.fail: msg="postfix_configuration must be defined"
   when: postfix_configuration is undefined
-  tags: postfix-relay
+  tags: postfix_relay
 
-- include: conf/remote-git.yml
+- name: include conf/remote-git.yml
+  ansible.builtin.include: conf/remote-git.yml
   when: postfix_configuration == 'git'
-  tags: postfix-relay
+  tags: postfix_relay
 
-- include: conf/local-git.yml
+- name: include conf/local-git.yml
+  ansible.builtin.include: conf/local-git.yml
   when: postfix_configuration == 'localhost'
-  tags: postfix-relay
+  tags: postfix_relay
 
-- include: conf/template.yml
+- name: include conf/template.yml
+  ansible.builtin.include: conf/template.yml
   when: postfix_configuration == 'template'
-  tags: postfix-relay
-    
+  tags: postfix_relay
+
 - name: configure aliases database
-  template:
+  ansible.builtin.template:
     src: aliases.j2
     dest: /etc/aliases
     owner: root
     group: root
     mode: 0644
-  notify: 
+  notify:
     - newaliases
     - restart postfix
-  tags: postfix-relay
+  tags: postfix_relay
 
 # Find zimbra.real-time.com as the relayhost change it to relay.real-time.com
 #
-- name: relay host check 
-  lineinfile:
+- name: relay host check
+  ansible.builtin.lineinfile:
     dest: /etc/postfix/main.cf
     regexp: '^relayhost(\s*)=(\s*)(\[?)zimbra\.real-time\.com(\]?)(.*)$'
     line: 'relayhost = [relay.real-time.com]'
-    backrefs: yes
-  ignore_errors: yes
-  tags: postfix-relay
+    backrefs: true
+  ignore_errors: true
+  tags: postfix_relay
 
 - name: listen on non-standard port
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/postfix/master.cf
     regexp: '^{{ item }}'
     line: '{{ item }}  inet  n       -       y       -       -       smtpd'
@@ -66,13 +72,15 @@
     - postfix_ports is defined
   notify:
     - reload postfix
-  tags: postfix-relay
+  tags: postfix_relay
 
-- include: dovecot/main.yml
+- name: dovecot/main.yml
+  ansible.builtin.include: dovecot/main.yml
   when:
-    - postfix_sasl_type is defined 
+    - postfix_sasl_type is defined
     - postfix_sasl_type == 'dovecot'
 
-- include: tls/main.yml
+- name: tls/main.yml
+  ansible.builtin.include: tls/main.yml
   when:
     - postfix_tls_rsa is defined

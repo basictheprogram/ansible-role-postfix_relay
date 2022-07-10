@@ -1,41 +1,39 @@
 ---
-# tasks file for roles/postfix-relay
-
-- include: "{{ role_path }}/../lib/gnutls-certs.yml"
-  tags: postfix-relay
+- name: include gnutls-certs.yml
+  ansible.builtin.include: "{{ role_path }}/../lib/gnutls-certs.yml"
+  tags: postfix_relay
 
 - name: deploy TLS certificate and keys
-  copy:
+  ansible.builtin.copy:
     src: "{{ item }}"
     dest: "/etc/ssl/private/{{ item | basename }}"
     owner: root
     group: ssl-cert
     mode: 0640
-  changed_when: False
+  changed_when: false
   with_items:
     - "{{ key_pem }}"
     - "{{ cert_pem }}"
   notify:
     - update ca-certificates
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: combine certificate and key
-  shell: "/bin/cat {{ key_pem | basename }} {{ cert_pem | basename }} > {{ postfix_myhostname }}.pem"
+  ansible.builtin.shell: "/bin/cat {{ key_pem | basename }} {{ cert_pem | basename }} > {{ postfix_myhostname }}.pem"
   args:
     chdir: /etc/ssl/private/
     creates: /etc/ssl/private/{{ postfix_myhostname }}.pem
   changed_when: false
   notify:
     - update ca-certificates
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: fix permissions
-  file:
+  ansible.builtin.file:
     path: /etc/ssl/private/{{ postfix_myhostname }}.pem
     owner: root
     group: ssl-cert
     mode: 0640
   notify:
     - update ca-certificates
-  tags: postfix-relay
-    
+  tags: postfix_relay

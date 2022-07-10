@@ -1,8 +1,6 @@
 ---
-# tasks file for roles/postfix-relay
-
 - name: /var/run/dovecot
-  file: 
+  ansible.builtin.file:
     path: /var/run/dovecot
     owner: root
     group: root
@@ -10,10 +8,10 @@
     state: directory
   notify:
     - restart dovecot
-  tags: postfix-relay
-  
+  tags: postfix_relay
+
 - name: activate unix_listener
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/dovecot/conf.d/10-master.conf
     content: |
       service auth {
@@ -25,22 +23,22 @@
       }
   notify:
     - restart dovecot
-    - restart postfix   
-  tags: postfix-relay
+    - restart postfix
+  tags: postfix_relay
 
 - name: support broken MUA's
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-master.conf
     regexp: '^auth_mechanisms'
     line: 'auth_mechanisms = plain login'
     state: present
   notify:
     - restart dovecot
-    - restart postfix   
-  tags: postfix-relay
+    - restart postfix
+  tags: postfix_relay
 
 - name: smtpd_sender_login_maps
-  copy:
+  ansible.builtin.copy:
     src: login_map
     dest: /etc/postfix/login_map
     owner: root
@@ -49,10 +47,10 @@
   notify:
     - reload postfix
     - postmap
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: SASL with submission port
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/postfix/master.cf
     content: |
       submission inet n - n - - smtpd
@@ -65,52 +63,52 @@
         -o smtpd_client_restrictions=permit_sasl_authenticated,reject
         -o smtpd_sender_login_maps=pcre:/etc/postfix/login_map
         -o smtpd_sender_restrictions=reject_sender_login_mismatch
-        -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject    
+        -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject
   notify:
     - restart dovecot
-    - restart postfix   
-  tags: postfix-relay 
+    - restart postfix
+  tags: postfix_relay
 
 - name: activate auth-sql.conf
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-auth.conf
     regexp: '^#!include auth-sql.conf.ext'
     line: '!include auth-sql.conf.ext'
-    backrefs: yes
+    backrefs: true
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay
 
 # See vars/main.yml for dovecot variable definiations
 #
 - name: upload authentication database schema
-  copy:
-    src: auth-db.sql 
+  ansible.builtin.copy:
+    src: auth-db.sql
     dest: "{{ dovecot_sql_schema }}"
     owner: root
     group: root
     mode: 0640
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: create dovecot sqlite3 authentication database
-  shell: "/usr/bin/sqlite3 {{ dovecot_sql_db }} < {{ dovecot_sql_schema }}"
-  register: r 
+  ansible.builtin.shell: "/usr/bin/sqlite3 {{ dovecot_sql_db }} < {{ dovecot_sql_schema }}"
+  register: r
   failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
   changed_when: "'table users already exists' not in r.stderr"
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: secure authentication database file permissions
-  file:
+  ansible.builtin.file:
     path: "{{ dovecot_sql_db }}"
     owner: root
     group: root
     mode: 0640
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: use sqlite for authentication database
-  blockinfile:
+  ansible.builtin.blockinfile:
     dest: /etc/dovecot/dovecot-sql.conf.ext
     content: |
       driver = sqlite
@@ -124,34 +122,34 @@
       iterate_query = SELECT userid AS username, domain FROM users
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: use syslog dovecot logging
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#log_path'
     line: 'log_path = syslog'
-    backrefs: yes
+    backrefs: true
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: use mail syslog facility
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#syslog_facility'
     line: 'syslog_facility = mail'
-    backrefs: yes
+    backrefs: true
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: log unsuccessful authentication attempts
-  lineinfile:
+  ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#auth_verbose = no'
     line: 'auth_verbose = yes'
-    backrefs: yes
+    backrefs: true
   notify:
     - restart dovecot
-  tags: postfix-relay
+  tags: postfix_relay

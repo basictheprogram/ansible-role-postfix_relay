@@ -1,0 +1,26 @@
+---
+- name: prepare
+  hosts: all
+  become: true
+
+  vars:
+    prepare_packages:
+      - dialog
+      - less
+      - vim-tiny
+
+  environment:
+    TZ: "America/Chicago"    # Keep tzdata pacakge happy
+    DEBIAN_FRONTEND: "noninteractive"
+
+  tasks:
+    - name: PREPARE  pt
+      ansible.builtin.apt:
+        name: "{{ prepare_packages }}"
+        state: present
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+        autoremove: true
+        autoclean: true
+        install_recommends: false

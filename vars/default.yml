@@ -19,4 +19,3 @@ dovecot_sql_schema: "{{ dovecot_sql_schema_dir }}/{{ dovecot_sql_schema_name }}"
 dovecot_sql_db_dir: "/etc/postfix"
 dovecot_sql_db_name: "auth-db.db"
 dovecot_sql_db: "{{ dovecot_sql_db_dir }}/{{ dovecot_sql_db_name }}"
-

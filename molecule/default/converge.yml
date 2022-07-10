@@ -1,0 +1,17 @@
+---
+- name: converge
+  hosts: all
+  become: true
+
+  vars:
+    bootstrap_fqdn: molecule.local
+
+  environment:
+    TZ: "America/Chicago"    # Keep tzdata pacakge happy
+    DEBIAN_FRONTEND: "noninteractive"
+
+  tasks:
+
+    - name: "Include postfix_relay"
+      ansible.builtin.include_role:
+        name: "postfix_relay"

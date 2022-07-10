@@ -21,12 +21,12 @@ local_header_rewrite_clients = permit_mynetworks,permit_inet_interfaces
 smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
 smtpd_sasl_path = private/auth
 smtpd_sasl_auth_enable = yes
-smtpd_relay_restrictions = 
+smtpd_relay_restrictions =
     permit_mynetworks
     permit_sasl_authenticated
     reject_unauth_destination
 {% else %}
-smtpd_relay_restrictions = 
+smtpd_relay_restrictions =
     permit_mynetworks
     reject_unauth_destination
 {% endif %}

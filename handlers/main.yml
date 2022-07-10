@@ -1,55 +1,53 @@
 ---
-# handlers file for roles/postfix-relay
-
 - name: restart postfix
-  service:
+  ansible.builtin.service:
     name: "postfix"
     state: "restarted"
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: reload postfix
-  service:
+  ansible.builtin.service:
     name: "postfix"
     state: "reloaded"
-  tags: postfix-relay
+  tags: postfix_relay
 
 
 - name: newaliases
-  command: "/usr/bin/newaliases"
-  tags: postfix-relay
+  ansible.builtin.command: "/usr/bin/newaliases"
+  tags: postfix_relay
 
 - name: rebuild db
-  command: "/usr/bin/make"
+  ansible.builtin.command: "/usr/bin/make"
   args:
-      chdir: "/etc/postfix"
-  tags: postfix-relay 
+    chdir: "/etc/postfix"
+  tags: postfix_relay
 
 
 - name: restart dovecot
-  service:
+  ansible.builtin.ansible.builtin.service:
     name: "dovecot"
     state: "restarted"
-  tags: postfix-relay
+  tags: postfix_relay
 
 - name: reload dovecot
-  service:
+  ansible.builtin.service:
     name: "dovecot"
     state: "reloaded"
-  tags: postfix-relay
+  tags: postfix_relay
 
 
 - name: update ca-certificates
-  command: "/usr/sbin/update-ca-certificates"
-  register: r 
-  tags: postfix-relay
+  ansible.builtin.command: "/usr/sbin/update-ca-certificates"
+  register: r
+  tags: postfix_relay
 
 
-- name: postmap 
-  command: "/usr/sbin/postmap {{ item }}"
+- name: postmap
+  ansible.builtin.command: "/usr/sbin/postmap {{ item }}"
   args:
     chdir: /etc/postfix/
   register: r
   with_items:
     - "login_map"
     - "relay_domains"
-  tags: postfix-relay
+  tags: postfix_relay
