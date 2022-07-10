@@ -11,7 +11,6 @@
     state: "reloaded"
   tags: postfix_relay
 
-
 - name: newaliases
   ansible.builtin.command: "/usr/bin/newaliases"
   tags: postfix_relay
@@ -22,9 +21,8 @@
     chdir: "/etc/postfix"
   tags: postfix_relay
 
-
 - name: restart dovecot
-  ansible.builtin.ansible.builtin.service:
+  ansible.builtin.service:
     name: "dovecot"
     state: "restarted"
   tags: postfix_relay
@@ -35,12 +33,10 @@
     state: "reloaded"
   tags: postfix_relay
 
-
 - name: update ca-certificates
   ansible.builtin.command: "/usr/sbin/update-ca-certificates"
   register: r
   tags: postfix_relay
-
 
 - name: postmap
   ansible.builtin.command: "/usr/sbin/postmap {{ item }}"

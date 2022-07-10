@@ -1,6 +1,6 @@
 ---
-- name: include gnutls-certs.yml
-  ansible.builtin.include: "{{ role_path }}/../lib/gnutls-certs.yml"
+- name: gnutls-certs.yml
+  ansible.builtin.import_tasks: "{{ role_path }}/../lib/gnutls-certs.yml"
   tags: postfix_relay
 
 - name: deploy TLS certificate and keys

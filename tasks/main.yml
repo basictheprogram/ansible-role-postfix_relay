@@ -22,18 +22,18 @@
   when: postfix_configuration is undefined
   tags: postfix_relay
 
-- name: include conf/remote-git.yml
-  ansible.builtin.include: conf/remote-git.yml
+- name: conf/remote-git.yml
+  ansible.builtin.import_tasks: conf/remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix_relay
 
-- name: include conf/local-git.yml
-  ansible.builtin.include: conf/local-git.yml
+- name: conf/local-git.yml
+  ansible.builtin.import_tasks: conf/local-git.yml
   when: postfix_configuration == 'localhost'
   tags: postfix_relay
 
-- name: include conf/template.yml
-  ansible.builtin.include: conf/template.yml
+- name: conf/template.yml
+  ansible.builtin.import_tasks: conf/template.yml
   when: postfix_configuration == 'template'
   tags: postfix_relay
 
@@ -75,12 +75,12 @@
   tags: postfix_relay
 
 - name: dovecot/main.yml
-  ansible.builtin.include: dovecot/main.yml
+  ansible.builtin.include_tasks: dovecot/main.yml
   when:
     - postfix_sasl_type is defined
     - postfix_sasl_type == 'dovecot'
 
 - name: tls/main.yml
-  ansible.builtin.include: tls/main.yml
+  ansible.builtin.include_tasks: tls/main.yml
   when:
     - postfix_tls_rsa is defined

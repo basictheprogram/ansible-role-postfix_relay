@@ -22,7 +22,7 @@
   when:
     - postfix_mynetworks_conf is not defined
   with_items:
-    - "{{ postfix_mynetworks }}"
+    - "{{ postfix_conf.mynetworks }}"
   notify:
     - reload postfix
   tags: postfix_relay

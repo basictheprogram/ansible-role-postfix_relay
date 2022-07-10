@@ -1,24 +1,24 @@
-myhostname = {{ postfix_myhostname }}
+myhostname = {{ postfix_conf.myhostname }}
 alias_maps = hash:/etc/aliases
 alias_database = hash:/etc/aliases
-myorigin = {{ postfix_myorigin }}
-mydestination = {{ postfix_mydestination }}, localhost
+myorigin = {{ postfix_conf.myorigin }}
+mydestination = {{ postfix_conf.mydestination }}, localhost
 mynetworks = $config_directory/mynetworks
 mailbox_size_limit = 0
 recipient_delimiter = +
 inet_interfaces = all
-inet_protocols = {{ postfix_inet_protocols | default("all") }}
-compatibility_level = {{ postfix_compatibility_level | default("0") }}
-message_size_limit = {{ postfix_message_size_limit | default("10240000") }}
+inet_protocols = {{ postfix_conf.inet_protocols | default("all") }}
+compatibility_level = {{ postfix_conf.compatibility_level | default("0") }}
+message_size_limit = {{ postfix_conf.message_size_limit | default("10240000") }}
 
-{% if postfix_masquerade_domains is defined %}
-masquerade_domains = {{ postfix_masquerade_domains }}
+{% if postfix_conf.masquerade_domains is defined %}
+masquerade_domains = {{ postfix_conf.masquerade_domains }}
 local_header_rewrite_clients = permit_mynetworks,permit_inet_interfaces
 {% endif %}
 
-{% if postfix_sasl_type is defined %}
-{% if postfix_sasl_type == 'dovecot' %}
-smtpd_sasl_type = {{ postfix_sasl_type | default("dovecot") }}
+{% if postfix_conf.sasl_type is defined %}
+{% if postfix_conf.sasl_type == 'dovecot' %}
+smtpd_sasl_type = {{ postfix_conf.sasl_type | default("dovecot") }}
 smtpd_sasl_path = private/auth
 smtpd_sasl_auth_enable = yes
 smtpd_relay_restrictions =
@@ -32,13 +32,13 @@ smtpd_relay_restrictions =
 {% endif %}
 {% endif %}
 
-{% if postfix_tls_rsa is defined %}
+{% if postfix_conf.tls_rsa is defined %}
 # Enforce TLS "smtpd_tls_security_level = encrypt"
-smtpd_tls_security_level = {{ postfix_smtpd_tls_security_level | default("may") }}
+smtpd_tls_security_level = {{ postfix_conf.smtpd_tls_security_level | default("may") }}
 
-smtpd_tls_cert_file = /etc/ssl/private/{{ postfix_myhostname }}.pem
+smtpd_tls_cert_file = /etc/ssl/private/{{ postfix_conf.myhostname }}.pem
 smtpd_tls_key_file = $smtpd_tls_cert_file
-smtpd_tls_loglevel = {{ postfix_smtpd_tls_loglevel | default("1") }}
+smtpd_tls_loglevel = {{ postfix_conf.smtpd_tls_loglevel | default("1") }}
 smtpd_tls_received_header = yes
 smtpd_tls_auth_only = yes
 smtpd_tls_mandatory_ciphers = high

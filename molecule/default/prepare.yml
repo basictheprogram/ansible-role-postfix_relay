@@ -14,7 +14,7 @@
     DEBIAN_FRONTEND: "noninteractive"
 
   tasks:
-    - name: PREPARE  pt
+    - name: PREPARE apt
       ansible.builtin.apt:
         name: "{{ prepare_packages }}"
         state: present

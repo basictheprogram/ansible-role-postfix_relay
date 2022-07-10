@@ -5,13 +5,26 @@
 
   vars:
     bootstrap_fqdn: molecule.local
+    postfix_configuration: "template"
+    postfix_conf:
+      admin_email: admin@molecule.local
+      myhostname: molecule.local
+      myorigin: molecule.local
+      mydestination: "relay.molecule.local, molecule.local"
+      inet_protocols: ipv4
+      compatibility_level: 2
+      message_size_limit: 104857600
+      masquerade_domains: "REDACTED-domain.example.com"
+      mynetworks:
+        - "192.168.100.0/24"
+        - "172.16.0.0/16"
+
 
   environment:
     TZ: "America/Chicago"    # Keep tzdata pacakge happy
     DEBIAN_FRONTEND: "noninteractive"
 
   tasks:
-
-    - name: "Include postfix_relay"
+    - name: include_role postfix_relay
       ansible.builtin.include_role:
         name: "postfix_relay"
