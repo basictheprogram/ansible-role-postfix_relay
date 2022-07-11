@@ -5,15 +5,17 @@
 
 - name: deploy TLS certificate and keys
   ansible.builtin.copy:
-    src: "{{ item }}"
-    dest: "/etc/ssl/private/{{ item | basename }}"
+    src: "{{ postfix_relay_item }}"
+    dest: "/etc/ssl/private/{{ postfix_relay_item | basename }}"
     owner: root
     group: ssl-cert
     mode: 0640
   changed_when: false
-  with_items:
+  loop:
     - "{{ key_pem }}"
     - "{{ cert_pem }}"
+  loop_control:
+    loop_var: postfix_relay_item
   notify:
     - update ca-certificates
   tags: postfix_relay

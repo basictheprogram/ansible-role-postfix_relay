@@ -14,15 +14,16 @@
 - name: configure mynetworks (list)
   ansible.builtin.lineinfile:
     dest: /etc/postfix/mynetworks
-    regexp: '^{{ item }}(.*)$'
-    line: '{{ item }}'
+    regexp: '^{{ postfix_relay_item }}(.*)$'
+    line: '{{ postfix_relay_item }}'
     create: true
     state: present
     mode: 0644
   when:
     - postfix_mynetworks_conf is not defined
-  with_items:
-    - "{{ postfix_conf.mynetworks }}"
+  loop: "{{ postfix_conf.mynetworks }}"
+  loop_control:
+    loop_var: postfix_relay_item
   notify:
     - reload postfix
   tags: postfix_relay

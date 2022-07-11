@@ -39,11 +39,13 @@
   tags: postfix_relay
 
 - name: postmap
-  ansible.builtin.command: "/usr/sbin/postmap {{ item }}"
+  ansible.builtin.command: "/usr/sbin/postmap {{ post_relay_item }}"
   args:
     chdir: /etc/postfix/
   register: r
-  with_items:
+  loop:
     - "login_map"
     - "relay_domains"
+  loop_control:
+    loop_var: post_relay_item
   tags: postfix_relay

@@ -49,25 +49,15 @@
     - restart postfix
   tags: postfix_relay
 
-# Find zimbra.real-time.com as the relayhost change it to relay.real-time.com
-#
-- name: relay host check
-  ansible.builtin.lineinfile:
-    dest: /etc/postfix/main.cf
-    regexp: '^relayhost(\s*)=(\s*)(\[?)zimbra\.real-time\.com(\]?)(.*)$'
-    line: 'relayhost = [relay.real-time.com]'
-    backrefs: true
-  ignore_errors: true
-  tags: postfix_relay
-
 - name: listen on non-standard port
   ansible.builtin.lineinfile:
     dest: /etc/postfix/master.cf
-    regexp: '^{{ item }}'
+    regexp: '^{{ postfix_relay_item }}'
     line: '{{ item }}  inet  n       -       y       -       -       smtpd'
     state: present
-  with_items:
-    - "{{ postfix_ports }}"
+  loop: "{{ postfix_ports }}"
+  loop_control:
+    loop_var: postfix_relay_item
   when:
     - postfix_ports is defined
   notify:
