@@ -1,0 +1,150 @@
+---
+argument_specs:
+  main:
+    short_description: Configure Postfix as an SMTP relay
+    description:
+      - Installs Postfix, optionally with Dovecot SASL authentication
+        and TLS, and deploys C(main.cf) via one of two
+        C(postfix_configuration) modes.
+      - "Note: C(postfix_conf.tls_rsa: self-signed) is documented but
+        not currently functional standalone — see this role's
+        CLAUDE.md. C(lets_encrypt) is the only working C(tls_rsa)
+        option today."
+    options:
+      postfix_configuration:
+        type: str
+        required: true
+        choices:
+          - template
+          - localhost
+        description:
+          - How C(/etc/postfix) is populated. C(template) renders
+            C(main.cf) from this role's own template using
+            O(postfix_conf). C(localhost) is a no-op placeholder
+            (currently just logs a debug message) for hosts that
+            manage their own Postfix config outside this role.
+      postfix_ports:
+        type: list
+        elements: int
+        description:
+          - Additional TCP ports Postfix should listen on (added to
+            C(/etc/postfix/master.cf)), beyond the standard SMTP port.
+      postfix_aliases:
+        type: list
+        elements: dict
+        description:
+          - Extra entries appended to C(/etc/aliases), beyond the
+            built-in C(postmaster)/C(root) lines.
+        options:
+          user:
+            type: str
+            required: true
+            description: Local alias name.
+          alias:
+            type: str
+            required: true
+            description: Address or account the alias delivers to.
+      postfix_conf:
+        type: dict
+        description:
+          - Postfix configuration values used to render C(main.cf).
+            Required when O(postfix_configuration=template); ignored
+            otherwise.
+        options:
+          admin_email:
+            type: str
+            required: true
+            description: Delivery address for the C(root) alias.
+          myhostname:
+            type: str
+            required: true
+            description: Postfix C(myhostname).
+          myorigin:
+            type: str
+            required: true
+            description: Postfix C(myorigin).
+          mydestination:
+            type: str
+            required: true
+            description: >-
+              Postfix C(mydestination) (this role always appends
+              C(, localhost)).
+          inet_interfaces:
+            type: str
+            default: all
+            description: Postfix C(inet_interfaces).
+          inet_protocols:
+            type: str
+            default: all
+            description: Postfix C(inet_protocols).
+          compatibility_level:
+            type: str
+            default: "3"
+            description: Postfix C(compatibility_level).
+          message_size_limit:
+            type: str
+            default: "10240000"
+            description: Postfix C(message_size_limit), in bytes.
+          masquerade_domains:
+            type: str
+            description: >-
+              If set, enables C(masquerade_domains) and
+              C(local_header_rewrite_clients).
+          mynetworks:
+            type: raw
+            description: >-
+              A list of CIDR entries when O(postfix_conf.mynetworks_conf)
+              is unset or C(list); a source file path (copied to
+              C(/etc/postfix/mynetworks)) when it's C(file).
+          mynetworks_conf:
+            type: str
+            default: list
+            choices:
+              - list
+              - file
+            description: >-
+              Selects how O(postfix_conf.mynetworks) is interpreted —
+              see O(postfix_conf.mynetworks).
+          relay_domains:
+            type: str
+            description: >-
+              Source file path copied to
+              C(/etc/postfix/relay_domains). Only used when
+              O(postfix_conf.relay_domains_conf=file).
+          relay_domains_conf:
+            type: str
+            choices:
+              - file
+            description: >-
+              Must be C(file) for O(postfix_conf.relay_domains) to take
+              effect; there is no list-based mode for relay_domains.
+          sasl_type:
+            type: str
+            choices:
+              - dovecot
+            description: >-
+              If set to C(dovecot), enables Dovecot SASL
+              authentication (C(tasks/dovecot/main.yml)) and the
+              corresponding C(smtpd_sasl_*) / C(smtpd_relay_restrictions)
+              settings in C(main.cf).
+          tls_rsa:
+            type: str
+            choices:
+              - self-signed
+              - lets_encrypt
+            description: >-
+              Enables TLS and selects the certificate source.
+              C(self-signed) is not currently functional standalone
+              (see this role's CLAUDE.md); C(lets_encrypt) includes
+              C(geerlingguy.certbot) (declared in C(requirements.yml)).
+              C(main.cf)'s C(smtpd_tls_cert_file)/C(smtpd_tls_key_file)
+              always point at the Let's Encrypt path regardless of
+              which value is set here.
+          smtpd_tls_security_level:
+            type: str
+            default: may
+            description: Postfix C(smtpd_tls_security_level).
+          smtpd_tls_loglevel:
+            type: str
+            default: "1"
+            description: Postfix C(smtpd_tls_loglevel).

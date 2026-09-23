@@ -1,0 +1,8 @@
+---
+postfix_relay_packages:
+  - postfix
+  - postfix-pcre
+  - make
+  - dovecot-core
+  - dovecot-sqlite
+  - sqlite3
