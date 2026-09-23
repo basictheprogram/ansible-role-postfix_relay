@@ -1,5 +1,5 @@
 ---
-- name: install postfix-relay packages (apt)
+- name: Install postfix-relay packages (apt)
   ansible.builtin.apt:
     name: "{{ postfix_relay_packages }}"
     state: "present"

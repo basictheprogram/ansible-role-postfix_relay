@@ -1,45 +1,45 @@
 ---
-- name: restart postfix
+- name: Restart postfix
   ansible.builtin.service:
     name: "postfix"
     state: "restarted"
   tags: postfix_relay
 
-- name: reload postfix
+- name: Reload postfix
   ansible.builtin.service:
     name: "postfix"
     state: "reloaded"
   tags: postfix_relay
 
-- name: newaliases
+- name: Newaliases
   ansible.builtin.command: "/usr/bin/newaliases"
   tags: postfix_relay
 
-- name: rebuild db
+- name: Rebuild db
   ansible.builtin.command: "/usr/bin/make"
   args:
     chdir: "/etc/postfix"
   tags: postfix_relay
 
-- name: restart dovecot
+- name: Restart dovecot
   ansible.builtin.service:
     name: "dovecot"
     state: "restarted"
   tags: postfix_relay
 
-- name: reload dovecot
+- name: Reload dovecot
   ansible.builtin.service:
     name: "dovecot"
     state: "reloaded"
   tags: postfix_relay
 
-- name: update ca-certificates
+- name: Update ca-certificates
   ansible.builtin.command: "/usr/sbin/update-ca-certificates"
   register: r
   tags: postfix_relay
 
-- name: postmap
-  ansible.builtin.command: "/usr/sbin/postmap {{ post_relay_item }}"
+- name: Postmap
+  ansible.builtin.command: "/usr/sbin/postmap {{ postfix_relay_item }}"
   args:
     chdir: /etc/postfix/
   register: r
@@ -47,5 +47,5 @@
     - "login_map"
     - "relay_domains"
   loop_control:
-    loop_var: post_relay_item
+    loop_var: postfix_relay_item
   tags: postfix_relay

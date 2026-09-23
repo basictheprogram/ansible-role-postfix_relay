@@ -6,9 +6,9 @@ mydestination = {{ postfix_conf.mydestination }}, localhost
 mynetworks = $config_directory/mynetworks
 mailbox_size_limit = 0
 recipient_delimiter = +
-inet_interfaces = all
+inet_interfaces =  {{ postfix_conf.inet_interfaces | default("all") }}
 inet_protocols = {{ postfix_conf.inet_protocols | default("all") }}
-compatibility_level = {{ postfix_conf.compatibility_level | default("0") }}
+compatibility_level = {{ postfix_conf.compatibility_level | default("3") }}
 message_size_limit = {{ postfix_conf.message_size_limit | default("10240000") }}
 
 {% if postfix_conf.masquerade_domains is defined %}
@@ -35,11 +35,11 @@ smtpd_relay_restrictions =
 {% if postfix_conf.tls_rsa is defined %}
 # Enforce TLS "smtpd_tls_security_level = encrypt"
 smtpd_tls_security_level = {{ postfix_conf.smtpd_tls_security_level | default("may") }}
-
-smtpd_tls_cert_file = /etc/ssl/private/{{ postfix_conf.myhostname }}.pem
-smtpd_tls_key_file = $smtpd_tls_cert_file
+smtpd_tls_cert_file = /etc/letsencrypt/live/{{ postfix_conf.myhostname }}/fullchain.pem
+smtpd_tls_key_file = /etc/letsencrypt/live/{{ postfix_conf.myhostname }}/privkey.pem
 smtpd_tls_loglevel = {{ postfix_conf.smtpd_tls_loglevel | default("1") }}
 smtpd_tls_received_header = yes
+smtpd_tls_session_cache_timeout = 3600s
 smtpd_tls_auth_only = yes
 smtpd_tls_mandatory_ciphers = high
 {% endif %}

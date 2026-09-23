@@ -1,5 +1,5 @@
 ---
-- name: gather OS specific variables
+- name: Gather OS specific variables
   ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
@@ -12,32 +12,33 @@
         - "vars"
   tags: postfix_relay
 
-- name: import_tasks debian.yml
+- name: Import_tasks debian.yml
   ansible.builtin.import_tasks: debian.yml
   when: ansible_os_family == 'Debian'
   tags: postfix_relay
 
-- name: check for postfix_configuration
-  ansible.builtin.fail: msg="postfix_configuration must be defined"
+- name: Check for postfix_configuration
+  ansible.builtin.fail:
+    msg: "postfix_configuration must be defined"
   when: postfix_configuration is undefined
   tags: postfix_relay
 
-- name: conf/remote-git.yml
+- name: Conf/remote-git.yml
   ansible.builtin.import_tasks: conf/remote-git.yml
   when: postfix_configuration == 'git'
   tags: postfix_relay
 
-- name: conf/local-git.yml
+- name: Conf/local-git.yml
   ansible.builtin.import_tasks: conf/local-git.yml
   when: postfix_configuration == 'localhost'
   tags: postfix_relay
 
-- name: conf/template.yml
+- name: Conf/template.yml
   ansible.builtin.import_tasks: conf/template.yml
   when: postfix_configuration == 'template'
   tags: postfix_relay
 
-- name: configure aliases database
+- name: Configure aliases database
   ansible.builtin.template:
     src: aliases.j2
     dest: /etc/aliases
@@ -45,11 +46,11 @@
     group: root
     mode: 0644
   notify:
-    - newaliases
-    - restart postfix
+    - Newaliases
+    - Restart postfix
   tags: postfix_relay
 
-- name: listen on non-standard port
+- name: Listen on non-standard port
   ansible.builtin.lineinfile:
     dest: /etc/postfix/master.cf
     regexp: '^{{ postfix_relay_item }}'
@@ -61,16 +62,29 @@
   when:
     - postfix_ports is defined
   notify:
-    - reload postfix
+    - Reload postfix
   tags: postfix_relay
 
-- name: dovecot/main.yml
+- name: Dovecot/main.yml
   ansible.builtin.include_tasks: dovecot/main.yml
   when:
-    - postfix_sasl_type is defined
-    - postfix_sasl_type == 'dovecot'
+    - postfix_conf.sasl_type is defined
+    - postfix_conf.sasl_type == 'dovecot'
+  tags: postfix_relay
 
-- name: tls/main.yml
+- name: Import TLS tasks (self-signed)
   ansible.builtin.include_tasks: tls/main.yml
   when:
-    - postfix_tls_rsa is defined
+    - postfix_conf.tls_rsa is defined
+    - postfix_conf.tls_rsa == 'self-signed'
+  tags: postfix_relay
+
+- name: Import geerlingguy.certbot (lets_encrypt)
+  ansible.builtin.include_role:
+    name: geerlingguy.certbot
+  vars:
+    certbot_install_method: package
+  when:
+    - postfix_conf.tls_rsa is defined
+    - postfix_conf.tls_rsa == 'lets_encrypt'
+  tags: postfix_relay

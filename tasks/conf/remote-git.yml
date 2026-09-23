@@ -1,16 +1,16 @@
 ---
-- name: check if postfix configuration under git
+- name: Check if postfix configuration under git
   ansible.builtin.stat:
     path: /etc/postfix/.git
   register: st
   tags: postfix_relay
 
-- name: move non-git controlled postfix configuration
+- name: Move non-git controlled postfix configuration
   ansible.builtin.command: "mv /etc/postfix /tmp/postfix.old"
   when: st.stat.isdir is not defined
   tags: postfix_relay
 
-- name: deploy postfix configuration via git
+- name: Deploy postfix configuration via git
   ansible.builtin.git:
     repo: "{{ postfix_repository }}"
     dest: "/etc/postfix"

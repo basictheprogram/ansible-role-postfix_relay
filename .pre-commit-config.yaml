@@ -12,13 +12,12 @@ repos:
       - id: check-yaml
       - id: check-added-large-files
       - id: detect-private-key
-      - id: check-xml
       - id: check-shebang-scripts-are-executable
       - id: file-contents-sorter
         files: requirements.txt|\.gitignore|\.dockerignore
 
   - repo: https://github.com/adrienverge/yamllint.git
-    rev: v1.26.3
+    rev: v1.28.0
     hooks:
       - id: yamllint
         files: \.(yaml|yml)$
@@ -26,13 +25,13 @@ repos:
         entry: yamllint --strict -f parsable
 
   - repo: https://github.com/ansible/ansible-lint.git
-    rev: v6.3.0
+    rev: v6.8.2
     hooks:
       - id: ansible-lint
         files: \.(yaml|yml)$
         entry: ansible-lint  --force-color -v
 
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.8.11
+    rev: v8.15.0
     hooks:
       - id: gitleaks

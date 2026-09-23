@@ -1,5 +1,5 @@
 ---
-- name: install postfix main configuration via template
+- name: Install postfix main configuration via template
   ansible.builtin.template:
     src: main_cf.j2
     dest: /etc/postfix/main.cf
@@ -7,53 +7,72 @@
     group: root
     mode: 0644
   notify:
-    - update ca-certificates
-    - restart postfix
+    - Update ca-certificates
+    - Restart postfix
   tags: postfix_relay
 
-- name: configure mynetworks (list)
-  ansible.builtin.lineinfile:
-    dest: /etc/postfix/mynetworks
-    regexp: '^{{ postfix_relay_item }}(.*)$'
-    line: '{{ postfix_relay_item }}'
-    create: true
-    state: present
-    mode: 0644
-  when:
-    - postfix_mynetworks_conf is not defined
-  loop: "{{ postfix_conf.mynetworks }}"
-  loop_control:
-    loop_var: postfix_relay_item
-  notify:
-    - reload postfix
+- name: Debug
+  ansible.builtin.debug:
+    var: postfix_conf.mynetworks_conf
   tags: postfix_relay
 
-- name: configure mynetworks (file)
+# - name: Configure mynetworks (list)
+#   ansible.builtin.lineinfile:
+#     dest: /etc/postfix/mynetworks
+#     regexp: '^{{ postfix_relay_item }}(.*)$'
+#     line: '{{ postfix_relay_item }}'
+#     create: true
+#     state: present
+#     mode: 0644
+#   loop: "{{ postfix_conf.mynetworks | default([]) }}"
+#   loop_control:
+#     loop_var: postfix_relay_item
+#   when: postfix_conf.mynetworks_conf != 'file'
+#   notify:
+#     - Reload postfix
+#   tags: postfix_relay
+
+- name: Configure mynetworks (file)
   ansible.builtin.copy:
-    src: "{{ postfix_mynetworks }}"
+    src: "{{ postfix_conf.mynetworks }}"
     dest: /etc/postfix/mynetworks
     owner: root
     group: root
     mode: 0644
   when:
-    - postfix_mynetworks_conf is defined
-    - postfix_mynetworks_conf == 'file'
+    - postfix_conf.mynetworks_conf is defined
+    - postfix_conf.mynetworks_conf == 'file'
   notify:
-    - postmap
-    - reload postfix
+    - Postmap
+    - Reload postfix
   tags: postfix_relay
 
-- name: configure relay_domains (file)
+- name: Configure relay_domains (file)
   ansible.builtin.copy:
-    src: "{{ postfix_relay_domains }}"
+    src: "{{ postfix_conf.relay_domains }}"
     dest: /etc/postfix/relay_domains
     owner: root
     group: root
     mode: 0644
   when:
-    - postfix_relay_domains is defined
-    - postfix_relay_domains == 'file'
+    - postfix_conf.relay_domains is defined
+    - postfix_conf.relay_domains_conf == 'file'
   notify:
-    - postmap
-    - reload postfix
+    - Postmap
+    - Reload postfix
   tags: postfix_relay
+
+# - name: Configure login_map (file)
+#   ansible.builtin.copy:
+#     src: "{{ postfix_conf.login_map }}"
+#     dest: /etc/postfix/login_map
+#     owner: root
+#     group: root
+#     mode: 0644
+#   when:
+#     - postfix_conf.login_map is defined
+#     - postfix_conf.login_map_conf == 'file'
+#   notify:
+#     - Postmap
+#     - Reload postfix
+#   tags: postfix_relay

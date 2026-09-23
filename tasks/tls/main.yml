@@ -1,9 +1,9 @@
 ---
-- name: gnutls-certs.yml
+- name: Gnutls-certs.yml
   ansible.builtin.import_tasks: "{{ role_path }}/../lib/gnutls-certs.yml"
   tags: postfix_relay
 
-- name: deploy TLS certificate and keys
+- name: Deploy TLS certificate and keys
   ansible.builtin.copy:
     src: "{{ postfix_relay_item }}"
     dest: "/etc/ssl/private/{{ postfix_relay_item | basename }}"
@@ -20,7 +20,7 @@
     - update ca-certificates
   tags: postfix_relay
 
-- name: combine certificate and key
+- name: Combine certificate and key
   ansible.builtin.shell: "/bin/cat {{ key_pem | basename }} {{ cert_pem | basename }} > {{ postfix_myhostname }}.pem"
   args:
     chdir: /etc/ssl/private/
@@ -30,7 +30,7 @@
     - update ca-certificates
   tags: postfix_relay
 
-- name: fix permissions
+- name: Fix permissions
   ansible.builtin.file:
     path: /etc/ssl/private/{{ postfix_myhostname }}.pem
     owner: root

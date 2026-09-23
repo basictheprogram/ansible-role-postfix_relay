@@ -7,10 +7,10 @@
     mode: 0755
     state: directory
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
-- name: activate unix_listener
+- name: Activate unix_listener
   ansible.builtin.blockinfile:
     dest: /etc/dovecot/conf.d/10-master.conf
     content: |
@@ -22,22 +22,22 @@
           }
       }
   notify:
-    - restart dovecot
-    - restart postfix
+    - Restart dovecot
+    - Restart postfix
   tags: postfix_relay
 
-- name: support broken MUA's
+- name: Support broken MUA's
   ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-master.conf
     regexp: '^auth_mechanisms'
     line: 'auth_mechanisms = plain login'
     state: present
   notify:
-    - restart dovecot
-    - restart postfix
+    - Restart dovecot
+    - Restart postfix
   tags: postfix_relay
 
-- name: smtpd_sender_login_maps
+- name: Smtpd_sender_login_maps
   ansible.builtin.copy:
     src: login_map
     dest: /etc/postfix/login_map
@@ -45,8 +45,8 @@
     group: root
     mode: 0644
   notify:
-    - reload postfix
-    - postmap
+    - Reload postfix
+    - Postmap
   tags: postfix_relay
 
 - name: SASL with submission port
@@ -65,23 +65,23 @@
         -o smtpd_sender_restrictions=reject_sender_login_mismatch
         -o smtpd_recipient_restrictions=reject_non_fqdn_recipient,reject_unknown_recipient_domain,permit_sasl_authenticated,reject
   notify:
-    - restart dovecot
-    - restart postfix
+    - Restart dovecot
+    - Restart postfix
   tags: postfix_relay
 
-- name: activate auth-sql.conf
+- name: Activate auth-sql.conf
   ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-auth.conf
     regexp: '^#!include auth-sql.conf.ext'
     line: '!include auth-sql.conf.ext'
     backrefs: true
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
 # See vars/main.yml for dovecot variable definiations
 #
-- name: upload authentication database schema
+- name: Upload authentication database schema
   ansible.builtin.copy:
     src: auth-db.sql
     dest: "{{ dovecot_sql_schema }}"
@@ -90,16 +90,16 @@
     mode: 0640
   tags: postfix_relay
 
-- name: create dovecot sqlite3 authentication database
+- name: Create dovecot sqlite3 authentication database
   ansible.builtin.shell: "/usr/bin/sqlite3 {{ dovecot_sql_db }} < {{ dovecot_sql_schema }}"
   register: r
   failed_when: "'table users already exists' not in r.stderr and r.rc != 0"
   changed_when: "'table users already exists' not in r.stderr"
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
-- name: secure authentication database file permissions
+- name: Secure authentication database file permissions
   ansible.builtin.file:
     path: "{{ dovecot_sql_db }}"
     owner: root
@@ -107,7 +107,7 @@
     mode: 0640
   tags: postfix_relay
 
-- name: use sqlite for authentication database
+- name: Use sqlite for authentication database
   ansible.builtin.blockinfile:
     dest: /etc/dovecot/dovecot-sql.conf.ext
     content: |
@@ -121,35 +121,35 @@
       # For using doveadm -A:
       iterate_query = SELECT userid AS username, domain FROM users
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
-- name: use syslog dovecot logging
+- name: Use syslog dovecot logging
   ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#log_path'
     line: 'log_path = syslog'
     backrefs: true
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
-- name: use mail syslog facility
+- name: Use mail syslog facility
   ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#syslog_facility'
     line: 'syslog_facility = mail'
     backrefs: true
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay
 
-- name: log unsuccessful authentication attempts
+- name: Log unsuccessful authentication attempts
   ansible.builtin.lineinfile:
     dest: /etc/dovecot/conf.d/10-logging.conf
     regexp: '^#auth_verbose = no'
     line: 'auth_verbose = yes'
     backrefs: true
   notify:
-    - restart dovecot
+    - Restart dovecot
   tags: postfix_relay

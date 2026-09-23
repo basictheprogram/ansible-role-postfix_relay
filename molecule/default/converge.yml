@@ -1,5 +1,5 @@
 ---
-- name: converge
+- name: Converge
   hosts: all
   become: true
 
@@ -8,7 +8,7 @@
     postfix_configuration: "template"
     postfix_conf:
       admin_email: admin@molecule.local
-      myhostname: molecule.local
+      myhostname: Molecule.local
       myorigin: molecule.local
       mydestination: "relay.molecule.local, molecule.local"
       inet_protocols: ipv4
@@ -25,6 +25,6 @@
     DEBIAN_FRONTEND: "noninteractive"
 
   tasks:
-    - name: include_role postfix_relay
+    - name: Include_role postfix_relay
       ansible.builtin.include_role:
         name: "postfix_relay"
