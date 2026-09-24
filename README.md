@@ -186,5 +186,4 @@ MIT
 
 # Author Information #
 
-[Real Time Enterprises Inc.](http://www.real-time.com),
 [Bob Tanner](https://github.com/basictheprogram)
