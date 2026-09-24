@@ -4,25 +4,37 @@
   become: true
 
   vars:
-    bootstrap_fqdn: molecule.local
     postfix_configuration: "template"
     postfix_conf:
       admin_email: admin@molecule.local
-      myhostname: Molecule.local
+      myhostname: molecule.local
       myorigin: molecule.local
       mydestination: "relay.molecule.local, molecule.local"
       inet_protocols: ipv4
       compatibility_level: 2
       message_size_limit: 104857600
-      masquerade_domains: "REDACTED-domain.example.com"
+      masquerade_domains: "masquerade.molecule.local"
       mynetworks:
         - "192.168.100.0/24"
         - "172.16.0.0/16"
 
-
   environment:
-    TZ: "America/Chicago"    # Keep tzdata pacakge happy
+    TZ: "America/Chicago"    # Keep tzdata package happy
     DEBIAN_FRONTEND: "noninteractive"
+
+  pre_tasks:
+    - name: Update apt cache
+      ansible.builtin.apt:
+        update_cache: true
+        cache_valid_time: 3600
+        force_apt_get: true
+      changed_when: false
+      when: ansible_facts.os_family == 'Debian'
+    - name: Update dnf cache
+      ansible.builtin.dnf:
+        update_cache: true
+      changed_when: false
+      when: ansible_facts.os_family == 'RedHat'
 
   tasks:
     - name: Include_role postfix_relay

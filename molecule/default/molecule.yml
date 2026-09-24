@@ -1,15 +1,38 @@
 ---
 dependency:
-  name: Galaxy
+  name: galaxy
 driver:
-  name: Docker
-lint: |
-  set -e
-  yamllint .
-  ansible-lint .
+  name: docker
 platforms:
-  - name: Postfix-relay-molecule-jammy-instance
-    image: "geerlingguy/docker-ubuntu2204-ansible"
+  - name: ubuntu-jammy
+    image: geerlingguy/docker-ubuntu2204-ansible:latest
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: ubuntu-noble
+    image: geerlingguy/docker-ubuntu2404-ansible:latest
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: ubuntu-resolute
+    image: geerlingguy/docker-ubuntu2604-ansible:latest
+    tmpfs:
+      - /run
+      - /tmp
+    volumes:
+      - /sys/fs/cgroup:/sys/fs/cgroup:ro
+    privileged: true
+    pre_build_image: true
+  - name: debian-trixie
+    image: geerlingguy/docker-debian13-ansible:latest
     tmpfs:
       - /run
       - /tmp
@@ -18,15 +41,17 @@ platforms:
     privileged: true
     pre_build_image: true
 provisioner:
-  name: Ansible
+  name: ansible
   playbooks:
     prepare: prepare.yml
     converge: converge.yml
   inventory:
     host_vars:
-      postfix-relay-molecule-jammy-instance:
+      ubuntu-jammy:
         tweak_motd: true
 verifier:
-  name: Testinfra
+  name: testinfra
+  directory: tests/
   options:
-    verbose: true
+    v: true
+    p: "no:cacheprovider"
