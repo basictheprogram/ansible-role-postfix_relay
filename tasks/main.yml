@@ -1,31 +1,23 @@
 ---
+- name: Run preflight assertions
+  ansible.builtin.include_tasks: preflight.yml
+  tags: always
+
 - name: Gather OS specific variables
   ansible.builtin.include_vars: "{{ lookup('first_found', params) }}"
   vars:
     params:
       files:
-        - "{{ ansible_distribution_release }}.yml"
-        - "{{ ansible_distribution }}.yml"
-        - "{{ ansible_os_family }}.yml"
-        - "default.yml"
+        - "{{ ansible_facts['distribution_release'] }}.yml"
+        - "{{ ansible_facts['distribution'] }}.yml"
+        - "{{ ansible_facts['os_family'] }}.yml"
       paths:
         - "vars"
   tags: postfix_relay
 
 - name: Import_tasks debian.yml
   ansible.builtin.import_tasks: debian.yml
-  when: ansible_os_family == 'Debian'
-  tags: postfix_relay
-
-- name: Check for postfix_configuration
-  ansible.builtin.fail:
-    msg: "postfix_configuration must be defined"
-  when: postfix_configuration is undefined
-  tags: postfix_relay
-
-- name: Conf/remote-git.yml
-  ansible.builtin.import_tasks: conf/remote-git.yml
-  when: postfix_configuration == 'git'
+  when: ansible_facts['os_family'] == 'Debian'
   tags: postfix_relay
 
 - name: Conf/local-git.yml
@@ -44,7 +36,7 @@
     dest: /etc/aliases
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Newaliases
     - Restart postfix

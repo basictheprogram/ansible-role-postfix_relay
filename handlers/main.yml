@@ -13,12 +13,7 @@
 
 - name: Newaliases
   ansible.builtin.command: "/usr/bin/newaliases"
-  tags: postfix_relay
-
-- name: Rebuild db
-  ansible.builtin.command: "/usr/bin/make"
-  args:
-    chdir: "/etc/postfix"
+  changed_when: true
   tags: postfix_relay
 
 - name: Restart dovecot
@@ -36,6 +31,7 @@
 - name: Update ca-certificates
   ansible.builtin.command: "/usr/sbin/update-ca-certificates"
   register: r
+  changed_when: true
   tags: postfix_relay
 
 - name: Postmap
@@ -43,6 +39,7 @@
   args:
     chdir: /etc/postfix/
   register: r
+  changed_when: true
   loop:
     - "login_map"
     - "relay_domains"

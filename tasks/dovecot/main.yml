@@ -4,7 +4,7 @@
     path: /var/run/dovecot
     owner: root
     group: root
-    mode: 0755
+    mode: "0755"
     state: directory
   notify:
     - Restart dovecot
@@ -43,7 +43,7 @@
     dest: /etc/postfix/login_map
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Reload postfix
     - Postmap
@@ -87,7 +87,7 @@
     dest: "{{ dovecot_sql_schema }}"
     owner: root
     group: root
-    mode: 0640
+    mode: "0640"
   tags: postfix_relay
 
 - name: Create dovecot sqlite3 authentication database
@@ -104,7 +104,7 @@
     path: "{{ dovecot_sql_db }}"
     owner: root
     group: root
-    mode: 0640
+    mode: "0640"
   tags: postfix_relay
 
 - name: Use sqlite for authentication database

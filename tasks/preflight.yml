@@ -1,0 +1,58 @@
+---
+- name: Assert ansible-core version compatibility
+  ansible.builtin.assert:
+    that:
+      - ansible_version.full is version('2.20', '>=')
+    fail_msg: >-
+      realtime.postfix_relay requires ansible-core >= 2.20 (found
+      {{ ansible_version.full }}).
+    quiet: true
+
+- name: Assert supported OS family
+  ansible.builtin.assert:
+    that:
+      - ansible_facts['os_family'] == 'Debian'
+    fail_msg: >-
+      realtime.postfix_relay only supports Debian-family hosts
+      (Debian, Ubuntu); found {{ ansible_facts['os_family'] }}.
+    quiet: true
+
+- name: Assert mynetworks (file) mode has a source file set
+  ansible.builtin.assert:
+    that:
+      - postfix_conf.mynetworks is defined
+    fail_msg: >-
+      postfix_conf.mynetworks_conf: file requires postfix_conf.mynetworks
+      to be set to a source file path.
+    quiet: true
+  when:
+    - postfix_configuration == 'template'
+    - postfix_conf.mynetworks_conf | default('list') == 'file'
+
+- name: Assert relay_domains is only set alongside relay_domains_conf file
+  ansible.builtin.assert:
+    that:
+      - postfix_conf.relay_domains_conf is defined
+      - postfix_conf.relay_domains_conf == 'file'
+    fail_msg: >-
+      postfix_conf.relay_domains is set but postfix_conf.relay_domains_conf
+      is not 'file' -- relay_domains has no other mode and would be
+      silently ignored.
+    quiet: true
+  when:
+    - postfix_configuration == 'template'
+    - postfix_conf.relay_domains is defined
+
+- name: Assert self-signed TLS mode is not selected
+  ansible.builtin.assert:
+    that:
+      - postfix_conf.tls_rsa != 'self-signed'
+    fail_msg: >-
+      postfix_conf.tls_rsa: self-signed is not a working feature of
+      this role as checked out standalone (it imports a file that only
+      exists in the old monorepo) -- see this role's CLAUDE.md. Use
+      tls_rsa: lets_encrypt instead.
+    quiet: true
+  when:
+    - postfix_configuration == 'template'
+    - postfix_conf.tls_rsa is defined

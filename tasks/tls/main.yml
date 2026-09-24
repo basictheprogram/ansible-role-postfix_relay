@@ -9,7 +9,7 @@
     dest: "/etc/ssl/private/{{ postfix_relay_item | basename }}"
     owner: root
     group: ssl-cert
-    mode: 0640
+    mode: "0640"
   changed_when: false
   loop:
     - "{{ key_pem }}"
@@ -17,7 +17,7 @@
   loop_control:
     loop_var: postfix_relay_item
   notify:
-    - update ca-certificates
+    - Update ca-certificates
   tags: postfix_relay
 
 - name: Combine certificate and key
@@ -27,7 +27,7 @@
     creates: /etc/ssl/private/{{ postfix_myhostname }}.pem
   changed_when: false
   notify:
-    - update ca-certificates
+    - Update ca-certificates
   tags: postfix_relay
 
 - name: Fix permissions
@@ -35,7 +35,7 @@
     path: /etc/ssl/private/{{ postfix_myhostname }}.pem
     owner: root
     group: ssl-cert
-    mode: 0640
+    mode: "0640"
   notify:
-    - update ca-certificates
+    - Update ca-certificates
   tags: postfix_relay

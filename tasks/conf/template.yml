@@ -5,32 +5,27 @@
     dest: /etc/postfix/main.cf
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   notify:
     - Update ca-certificates
     - Restart postfix
   tags: postfix_relay
 
-- name: Debug
-  ansible.builtin.debug:
-    var: postfix_conf.mynetworks_conf
+- name: Configure mynetworks (list)
+  ansible.builtin.lineinfile:
+    dest: /etc/postfix/mynetworks
+    regexp: '^{{ postfix_relay_item }}(.*)$'
+    line: '{{ postfix_relay_item }}'
+    create: true
+    state: present
+    mode: "0644"
+  loop: "{{ postfix_conf.mynetworks | default([]) }}"
+  loop_control:
+    loop_var: postfix_relay_item
+  when: postfix_conf.mynetworks_conf | default('list') != 'file'
+  notify:
+    - Reload postfix
   tags: postfix_relay
-
-# - name: Configure mynetworks (list)
-#   ansible.builtin.lineinfile:
-#     dest: /etc/postfix/mynetworks
-#     regexp: '^{{ postfix_relay_item }}(.*)$'
-#     line: '{{ postfix_relay_item }}'
-#     create: true
-#     state: present
-#     mode: 0644
-#   loop: "{{ postfix_conf.mynetworks | default([]) }}"
-#   loop_control:
-#     loop_var: postfix_relay_item
-#   when: postfix_conf.mynetworks_conf != 'file'
-#   notify:
-#     - Reload postfix
-#   tags: postfix_relay
 
 - name: Configure mynetworks (file)
   ansible.builtin.copy:
@@ -38,7 +33,7 @@
     dest: /etc/postfix/mynetworks
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when:
     - postfix_conf.mynetworks_conf is defined
     - postfix_conf.mynetworks_conf == 'file'
@@ -53,7 +48,7 @@
     dest: /etc/postfix/relay_domains
     owner: root
     group: root
-    mode: 0644
+    mode: "0644"
   when:
     - postfix_conf.relay_domains is defined
     - postfix_conf.relay_domains_conf == 'file'
@@ -61,18 +56,3 @@
     - Postmap
     - Reload postfix
   tags: postfix_relay
-
-# - name: Configure login_map (file)
-#   ansible.builtin.copy:
-#     src: "{{ postfix_conf.login_map }}"
-#     dest: /etc/postfix/login_map
-#     owner: root
-#     group: root
-#     mode: 0644
-#   when:
-#     - postfix_conf.login_map is defined
-#     - postfix_conf.login_map_conf == 'file'
-#   notify:
-#     - Postmap
-#     - Reload postfix
-#   tags: postfix_relay
