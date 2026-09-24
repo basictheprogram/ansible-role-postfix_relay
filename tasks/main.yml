@@ -46,7 +46,7 @@
   ansible.builtin.lineinfile:
     dest: /etc/postfix/master.cf
     regexp: '^{{ postfix_relay_item }}'
-    line: '{{ item }}  inet  n       -       y       -       -       smtpd'
+    line: '{{ postfix_relay_item }}  inet  n       -       y       -       -       smtpd'
     state: present
   loop: "{{ postfix_ports }}"
   loop_control:

@@ -52,3 +52,8 @@ def test_mynetworks_file_contents(host: Host) -> None:
 def test_aliases_root_delivery(host: Host) -> None:
     content = host.file("/etc/aliases").content_string
     assert "root:           admin@molecule.local" in content
+
+
+def test_master_cf_nonstandard_port(host: Host) -> None:
+    content = host.file("/etc/postfix/master.cf").content_string
+    assert "10025  inet  n       -       y       -       -       smtpd" in content
